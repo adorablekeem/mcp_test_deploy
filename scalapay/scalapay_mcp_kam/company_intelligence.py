@@ -108,7 +108,7 @@ if __name__ == "__main__":
     import sys, traceback
     print("🚀 Starting MCP server...", file=sys.stderr)
     try:
-        mcp.run(transport="streamable-http", host="127.0.0.1", port=8001)
+        mcp.run(transport="streamable-http", host="0.0.0.0", port=8001)
     except Exception:
         print("❌ MCP crashed:", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
