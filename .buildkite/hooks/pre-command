@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+
+echo '--- Configuring the :aws-artifact: path'
+
+# set our artifact path to s3://bucket/pipeline-slug/tag if building from a tag.
+if [ ! -z "$BUILDKITE_TAG" ];
+then
+	BUILDKITE_ARTIFACT_UPLOAD_DESTINATION="$(dirname $BUILDKITE_ARTIFACT_UPLOAD_DESTINATION)/$BUILDKITE_PIPELINE_SLUG/$BUILDKITE_TAG"
+else
+	BUILDKITE_ARTIFACT_UPLOAD_DESTINATION="$(dirname $BUILDKITE_ARTIFACT_UPLOAD_DESTINATION)/$BUILDKITE_PIPELINE_SLUG/$BUILDKITE_BUILD_ID"
+fi

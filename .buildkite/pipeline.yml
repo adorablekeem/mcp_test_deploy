@@ -1,0 +1,65 @@
+steps:
+  - name: ":python: Running tests :pytest:"
+    command: pytest
+    plugins:
+      - docker-compose#v5.2.0:
+          build: app
+          run: app
+          buildkit: true
+          ssh: true
+          config:
+            - docker-compose.yml
+    agents:
+      queue: build
+
+  - name: ":python: Running linting :lint-roller:"
+    command: "flake8"
+    plugins:
+      - docker-compose#v5.2.0:
+          build: app
+          run: app
+          buildkit: true
+          ssh: true
+          config:
+            - docker-compose.yml
+    agents:
+      queue: build
+
+  - name: ":python: Running mypy :mypy:"
+    command: "mypy"
+    plugins:
+      - docker-compose#v5.2.0:
+          build: app
+          run: app
+          buildkit: true
+          ssh: true
+          config:
+            - docker-compose.yml
+    agents:
+      queue: build
+
+  - name: ":python: Running formatter and import sort checks :python-black: :isort:"
+    command: "black . --check && isort . --check"
+    plugins:
+      - docker-compose#v5.2.0:
+          build: app
+          run: app
+          buildkit: true
+          ssh: true
+          config:
+            - docker-compose.yml
+    agents:
+      queue: build
+
+  - name: ":python: Running bandit :bandit:"
+    command: "bandit -c pyproject.toml -r ."
+    plugins:
+      - docker-compose#v5.2.0:
+          build: app
+          run: app
+          buildkit: true
+          ssh: true
+          config:
+            - docker-compose.yml
+    agents:
+      queue: build

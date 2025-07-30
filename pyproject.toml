@@ -1,0 +1,136 @@
+[tool.poetry]
+name = "scalapay_mcp_kam"
+version = "0.0.0"
+description = ""
+authors = ["Keem Adorable <keem.adorable@scalapay.com>"]
+readme = "README.md"
+packages = [
+    { include = "scalapay/scalapay_mcp_kam" },
+]
+
+[project]
+name = "scalapay_mcp_kam"
+version = "0.1.0"
+description = "Scalapay sales automation"
+dependencies = [
+  "fastapi>=0.116.1",
+  "openai>=1.97.1",
+  "pydantic>=2.11.7",
+  "python-dateutil>=2.9.0",
+  "aiohttp>=3.9.5",
+  "httpx>=0.28.1",
+  "langchain-core==0.3.58",
+  "python-dotenv>=1.1.1",
+  "google-api-python-client>=2.176.0",
+  "google-api-support>=0.1.8",
+  "oauth2client>=4.1.3",
+  "httplib2>=0.22.0",
+  "matplotlib>=3.10.3",
+  "pandas>=2.3.1",
+  "fastmcp (>=2.10.6,<3.0.0)"
+]
+
+[tool.poetry.dependencies]
+python = "~3.12"
+fastapi = "^0.116.1"
+openai = "^1.97.1"
+pydantic = "^2.11.7"
+python-dateutil = "^2.9.0"
+aiohttp = "^3.9.5"
+google-api-python-client = "^2.176.0"
+oauth2client = "^4.1.3"
+httplib2 = "^0.22.0"
+httpx = "^0.28.1"
+langchain-core = "0.3.58"
+google-api-support = "^0.1.8"
+matplotlib = "^3.10.3"
+pandas = "^2.3.1"
+python-dotenv = "^1.1.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+commitizen = "^3.6.0"
+flake8 = "^6.1.0"
+isort = "^5.12.0"
+mypy = "^1.8.0"
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+flake8-eradicate = "^1.5.0"
+flake8-pytest-style = "^1.7.2"
+pep8-naming = "^0.13.3"
+flake8-bugbear = "^24.2.6"
+flake8-annotations = "^3.0.1"
+flake8-simplify = "^0.21.0"
+flake8-print = "^5.0.0"
+bandit = {extras = ["toml"], version = "^1.7.7"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.0.0"
+version_scheme = "semver"
+tag_format = "$version"
+update_changelog_on_bump = true
+major_version_zero = true
+bump_message = "bump: version $current_version → $new_version"
+version_files = ["pyproject.toml:version"]
+
+[tool.black]
+line-length = 120
+target-version = ['py312']
+include = '\.pyi?$'
+exclude = '''
+^/(
+  (
+    \.eggs
+    | .venv
+    | \.poetrys
+    | \.git
+    | build
+    | dist
+    | notebooks
+  )
+)
+'''
+
+[tool.isort]
+line_length = 120
+profile = "black"
+src_paths = ["scalapay/scalapay_mcp_kam", "tests"]
+skip = [".poetry", ".venv", "build", "dist"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = ["--cov=scalapay", "--cov-report=term-missing", "--cov-branch"]
+testpaths = ["tests"]
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+
+[tool.coverage.report]
+exclude_also = [
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    ]
+
+[tool.mypy]
+files = "scalapay/scalapay_mcp_kam/**/*.py"
+python_version = "3.12"
+follow_imports = "normal"
+strict_optional = "False"
+warn_redundant_casts = "True"
+warn_unused_ignores = "True"
+disallow_any_generics = "False"
+check_untyped_defs = "True"
+no_implicit_reexport = "True"
+no_implicit_optional = "True"
+disallow_untyped_defs = "False"
+ignore_missing_imports = "False"
+namespace_packages = "True"
+disallow_any_unimported = "True"
+exclude = []
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "dist", ".poetry"]
+targets = "scalapay"
