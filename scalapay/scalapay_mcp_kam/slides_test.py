@@ -11,7 +11,7 @@ import GoogleApiSupport.slides as slides
 import GoogleApiSupport.drive as drive
 
 # Set credentials
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "/Users/keem.adorable@scalapay.com/scalapay/scalapay_mcp_kam/scalapay/scalapay_mcp_kam/credentials.json"
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "scalapay/scalapay_mcp_kam/credentials.json"
 
 SERVICE_ACCOUNT_FILE = 'credentials.json'
 SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/presentations']
