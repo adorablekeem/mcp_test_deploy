@@ -86,21 +86,6 @@ async def create_slides(string: str, ctx: Context | None = None) -> dict:
             await ctx.error("❌ Upload to Drive failed")
         return {"error": "Upload failed"}
 
-    time.sleep(5)
-
-    try:
-        drive_service.permissions().create(
-            fileId=chart_file_id,
-            body={"type": "anyone", "role": "reader"},
-            fields="id"
-        ).execute()
-        logger.info("Permissions made public")
-        if ctx:
-            await ctx.info("🌍 Chart made publicly accessible")
-        time.sleep(3)
-    except Exception:
-        logger.exception("Failed to set permissions")
-
     direct_url = f"https://drive.google.com/uc?export=view&id={chart_file_id}"
 
     image_success = False
@@ -132,7 +117,7 @@ async def create_slides(string: str, ctx: Context | None = None) -> dict:
         await ctx.info("✅ Slide generation complete")
 
     return {
-        "info": info,
+        # "info": info,
         "pdf_path": pdf_path,
         "chart_file_id": chart_file_id,
         "chart_image_url": direct_url,
