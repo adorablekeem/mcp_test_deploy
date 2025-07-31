@@ -221,6 +221,7 @@ async def create_slides(string: str) -> dict:
 
     print("[DEBUG] Function completing...")
     return {
+        "info": info,
         "pdf_path": pdf_path,
         "chart_file_id": chart_file_id,
         "chart_image_url": direct_url,
