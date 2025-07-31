@@ -1,115 +1,65 @@
-from fastmcp import FastMCP
-# from src.agent.company_search import research_company_competitors
-# from src.agent.person_search import linkedin_search
-from langchain_core.runnables import RunnableConfig
-import GoogleApiSupport.slides as slides
 import base64
 import os
-from pydantic import AnyUrl
 from dotenv import load_dotenv
+from fastmcp import FastMCP
+from langchain_core.runnables import RunnableConfig
+import sys
+from fastmcp import Context
 
-# Load environment variables from .env file
+import logging
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s %(name)s: %(message)s')
+logger = logging.getLogger(__name__)
+
 load_dotenv()
-
-# Initialize FastMCP server
 mcp = FastMCP("company-intelligence")
 config = RunnableConfig()
-"""
+
+
 @mcp.tool()
-async def research_company_competitors_wrapper(company_name: str, company_domain: str = None) -> dict:
-    
-    Wrapper function for research_company_competitors to be used with FastMCP.
-    
-    Args:
-        company_name (str): The name of the company to research competitors for.
-    
-    Returns:
-        dict: A dictionary containing the competitors of the specified company.
-    
-    similarweb_state = {
-        "company_data": {
-            "company_id": "",
-            "company_name": company_name,
-            "company_domain": company_domain or ""
+async def create_slides_wrapper(string: str, ctx: Context | None = None) -> dict:
+    logger.info("create_slides_wrapper invoked")
+    logger.debug(f"Input string: {string}")
+    try:
+        from slides_test import create_slides
+        result = await create_slides(string)
+        pdf_path = result.get("pdf_path")
+        logger.info("Slides created successfully with PDF: %s", pdf_path)
+        return {
+            "message": "Slides created successfully",
+            "presentation_id": result["presentation_id"],
+            "pdf_resource_uri": f"file://{pdf_path}",
+            "chart_file_id": result.get("chart_file_id", "N/A"),
+            "chart_image_url": result.get("chart_image_url", "N/A"),
+            "info": result.get("info", {}),
         }
-    }
-    result = await research_company_competitors(similarweb_state, config)
-    return result
-"""
-"""
-@mcp.tool()
-async def research_person_info_wrapper(lead_name: str, company_name: str, lead_email: str = None, company_domain: str = None) -> dict:
-
-    Wrapper function for research_company_competitors to be used with FastMCP.
-    
-    Args:
-        company_name (str): The name of the company to research competitors for.
-    
-    Returns:
-        dict: A dictionary containing the competitors of the specified company.
-
-    similarweb_state = {
-        "lead_data": {
-            "company_id": "",
-            "lead_name": lead_name,
-            "lead_email": lead_email or ""
-        },
-        "company_data": {
-            "company_id": "",
-            "company_name": company_name,
-            "company_domain": company_domain or ""
-        }
-    }
-    result = await linkedin_search(similarweb_state, config)
-    return result
-
-
-# Keep track of latest PDF
-latest_pdf_path = None
-"""
-
-@mcp.tool()
-async def create_slides_wrapper(string: str) -> dict:
-    """
-    Creates a Google Slides presentation and prepares a PDF resource for download.
-    """
-    global latest_pdf_path
-    from slides_test import create_slides
-    result = await create_slides(string)
-    latest_pdf_path = result["pdf_path"]
-
-    return {
-        "message": "Slides created successfully",
-        "presentation_id": result["presentation_id"],
-        "pdf_resource_uri": f"file://{latest_pdf_path}",
-        "chart_file_id": result.get("chart_file_id", "N/A"),
-        "chart_image_url": result.get("chart_image_url", "N/A"),
-        "info": result.get("info", {})
-    }
+    except Exception as e:
+        logger.exception("Error in create_slides_wrapper")
+        # if within an MCP tool, optionally send to client
+        if ctx is not None:
+            await ctx.error(f"create_slides_wrapper failed: {e}")
+        return {"error": "Slides creation failed"}
 
 
 @mcp.resource(uri="file://{path}")
 async def serve_pdf(path: str):
-    """
-    Dynamic resource serving PDFs from local filesystem.
-    """
+    logger.debug("serve_pdf called with path: %s", path)
     full_path = path
     if not os.path.exists(full_path):
+        logger.error("serve_pdf: File not found %s", full_path)
         raise FileNotFoundError()
     with open(full_path, "rb") as f:
         data = f.read()
+    logger.info("serve_pdf: serving file %s (size: %d bytes)", path, len(data))
     return dict(
         uri=f"file://{full_path}",
         mime_type="application/pdf",
-        blob=base64.b64encode(data).decode("utf-8")
+        blob=base64.b64encode(data).decode("utf-8"),
     )
 
 if __name__ == "__main__":
-    import sys, traceback
-    print("🚀 Starting MCP server...", file=sys.stderr)
+    logger.info("🚀 Starting MCP server")
     try:
         mcp.run(transport="streamable-http", host="0.0.0.0", port=8001)
     except Exception:
-        print("❌ MCP crashed:", file=sys.stderr)
-        traceback.print_exc(file=sys.stderr)
+        logger.exception("❌ MCP crashed")
         sys.exit(1)

@@ -1,17 +1,7 @@
 {
 	"servers": {
-		"scalapay-mcp-kam": {
-			"type": "stdio",
-			"command": "/Users/keem.adorable@scalapay.com/scalapay/scalapay_mcp_kam/.venv/bin/python",
-			"args": [
-				"/Users/keem.adorable@scalapay.com/scalapay/scalapay_mcp_kam/scalapay/scalapay_mcp_kam/company_intelligence.py"
-			],
-			"env": {
-				"GOOGLE_APPLICATION_CREDENTIALS": "/Users/keem.adorable@scalapay.com/scalapay/scalapay_mcp_kam/scalapay/scalapay_mcp_kam/credentials.json"
-			}
-		},
-		"test-http": {
-			"url": "http://127.0.0.1:8001/mcp/",
+		"remote-mcp": {
+			"url": "https://mcp-test-deploy-2.onrender.com/mcp/",
 			"type": "http"
 		}
 	},
