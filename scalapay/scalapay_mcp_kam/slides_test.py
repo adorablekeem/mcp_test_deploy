@@ -46,11 +46,11 @@ async def create_slides(string: str, ctx: Context | None = None) -> dict:
     agent = MCPAgent(llm=llm, client=client, max_steps=30)
 
     # Run the query
-    result = await agent.run(
+    alfred_result = await agent.run(
         "output a dataframe for merchant Zalando in the last month",
         max_steps=30,
     )
-    print(f"\nResult: {result}")
+    print(f"\nResult: {alfred_result}")
     # Static data
     data = {
         "Month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
@@ -151,4 +151,5 @@ async def create_slides(string: str, ctx: Context | None = None) -> dict:
         "chart_image_url": direct_url,
         "image_insertion_success": image_success,
         "presentation_id": output_file_id,
+        "alfred_result": alfred_result,
     }
