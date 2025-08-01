@@ -20,7 +20,7 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/etc/secrets/credentials.json"
 drive_service = build("drive", "v3")
 
 
-async def create_slides_wrapper(merchant_token: str, starting_date: str, end_date:str, ctx: Context | None = None) -> dict:
+async def create_slides(merchant_token: str, starting_date: str, end_date:str, ctx: Context | None = None) -> dict:
 
     logger.debug("Starting create_slides function")
     logger.debug(f"Input string: {merchant_token}")
