@@ -20,9 +20,10 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/etc/secrets/credentials.json"
 drive_service = build("drive", "v3")
 
 
-async def create_slides(string: str, ctx: Context | None = None) -> dict:
+async def create_slides_wrapper(merchant_token: str, starting_date: str, end_date:str, ctx: Context | None = None) -> dict:
+
     logger.debug("Starting create_slides function")
-    logger.debug(f"Input string: {string}")
+    logger.debug(f"Input string: {merchant_token}")
     if ctx:
         await ctx.info("🚀 Starting slide generation")
 
@@ -87,7 +88,7 @@ async def create_slides(string: str, ctx: Context | None = None) -> dict:
     try:
         output_file_id = Drive.copy_file(presentation_id, "final_presentation")
         Drive.move_file(output_file_id, folder_id)
-        Slides.batch_text_replace({"bot": string}, output_file_id)
+        Slides.batch_text_replace({"bot": merchant_token}, output_file_id)
         logger.info(f"Slides updated and moved: {output_file_id}")
         if ctx:
             await ctx.info("📄 Template duplicated and text replaced")

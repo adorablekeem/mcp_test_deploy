@@ -31,6 +31,7 @@ async def create_slides_wrapper(merchant_token: str, starting_date: str, end_dat
     logger.debug(f"Input string: {merchant_token, ctx}")
     try:
         from slides_test import create_slides
+        # TO-DO: Remove elicit part in production
         result = await ctx.elicit(
             message="Please provide your information",
             response_type=UserInfo
