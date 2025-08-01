@@ -5,6 +5,7 @@ from fastmcp import FastMCP
 from langchain_core.runnables import RunnableConfig
 import sys
 from fastmcp import Context
+from dataclasses import dataclass
 
 import logging
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s %(name)s: %(message)s')
@@ -18,22 +19,39 @@ mcp = FastMCP("company-intelligence", instructions="""
     """)
 config = RunnableConfig()
 
+@dataclass
+class UserInfo:
+    merchant_token: str
+    start_date: str
+    end_date: str
+
 @mcp.tool()
 async def create_slides_wrapper(merchant_token: str, starting_date: str, end_date:str, ctx: Context | None = None) -> dict:
     logger.info("create_slides_wrapper invoked")
     logger.debug(f"Input string: {merchant_token, ctx}")
     try:
-        from slides_test_local import create_slides
-        result = await create_slides(merchant_token, starting_date, end_date, ctx=ctx)
-        pdf_path = result.get("pdf_path")
-        logger.info("Slides created successfully with PDF: %s", pdf_path)
+        from slides_test import create_slides
+        result = await ctx.elicit(
+            message="Please provide your information",
+            response_type=UserInfo
+        )
+        if result.action == "accept":
+            result_slides = await create_slides(merchant_token, starting_date, end_date, ctx=ctx)
+            pdf_path = result_slides.get("pdf_path")
+            logger.info("Slides created successfully with PDF: %s", pdf_path)
+            ctx.info("Slides created successfully")
+        elif result.action == "decline":
+            return "Information not provided"
+        else:
+            return "Operation cancelled"
+
         return {
             "message": "Slides created successfully",
-            "presentation_id": result["presentation_id"],
+            "presentation_id": result_slides["presentation_id"],
             "pdf_resource_uri": f"file://{pdf_path}",
-            "alfred_result": result.get("alfred_result", {}),
-            "chart_file_id": result.get("chart_file_id", "N/A"),
-            "chart_image_url": result.get("chart_image_url", "N/A"),
+            "alfred_result": result_slides.get("alfred_result", {}),
+            "chart_file_id": result_slides.get("chart_file_id", "N/A"),
+            "chart_image_url": result_slides.get("chart_image_url", "N/A"),
             # "info": result.get("info", {}),
         }
     except Exception as e:
@@ -59,6 +77,7 @@ async def serve_pdf(path: str):
         mime_type="application/pdf",
         blob=base64.b64encode(data).decode("utf-8"),
     )
+
 
 if __name__ == "__main__":
     logger.info("🚀 Starting MCP server")
