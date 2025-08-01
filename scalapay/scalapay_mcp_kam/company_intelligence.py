@@ -30,7 +30,7 @@ async def create_slides_wrapper(merchant_token: str, starting_date: str, end_dat
     logger.info("create_slides_wrapper invoked")
     logger.debug(f"Input string: {merchant_token, ctx}")
     try:
-        from slides_test_local import create_slides
+        from slides_test import create_slides
         result = await ctx.elicit(
             message="Please provide your information",
             response_type=UserInfo
