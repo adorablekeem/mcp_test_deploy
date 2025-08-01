@@ -23,7 +23,7 @@ async def create_slides_wrapper(merchant_token: str, starting_date: str, end_dat
     logger.info("create_slides_wrapper invoked")
     logger.debug(f"Input string: {merchant_token, ctx}")
     try:
-        from slides_test_local import create_slides
+        from slides_test import create_slides
         result = await create_slides(merchant_token, starting_date, end_date, ctx=ctx)
         pdf_path = result.get("pdf_path")
         logger.info("Slides created successfully with PDF: %s", pdf_path)
