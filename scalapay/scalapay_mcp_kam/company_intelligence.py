@@ -82,7 +82,7 @@ async def serve_pdf(path: str):
 if __name__ == "__main__":
     logger.info("🚀 Starting MCP server")
     try:
-        mcp.run(transport="stdio")
+        mcp.run(transport="streamable-http", host="0.0.0.0", port=8002)
     except Exception:
         logger.exception("❌ MCP crashed")
         sys.exit(1)
