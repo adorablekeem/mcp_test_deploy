@@ -3,7 +3,7 @@
 		"remote-mcp": {
 			"url": "https://mcp-test-deploy-2.onrender.com/mcp/",
 			"type": "http"
-		}
+		},
 	},
 	"inputs": []
 }

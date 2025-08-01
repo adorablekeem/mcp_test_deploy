@@ -1,7 +1,7 @@
 import os
 import time
 import logging
-
+import asyncio
 import GoogleApiSupport.drive as Drive
 import GoogleApiSupport.slides as Slides
 import matplotlib.pyplot as plt
@@ -11,16 +11,17 @@ from fastmcp import Context
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from mcp_use import MCPAgent, MCPClient
+
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
 # Set credentials
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/etc/secrets/credentials.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./scalapay/scalapay_mcp_kam/credentials.json"
 drive_service = build("drive", "v3")
 
 
-async def create_slides(string: str, ctx: Context | None = None) -> dict:
+async def create_slides(string: str, starting_date: str, end_date: str, ctx: Context | None = None) -> dict:
     logger.debug("Starting create_slides function")
     logger.debug(f"Input string: {string}")
     if ctx:
@@ -43,14 +44,20 @@ async def create_slides(string: str, ctx: Context | None = None) -> dict:
     llm = ChatOpenAI(model="gpt-4o")
 
     # Create agent with the client
-    agent = MCPAgent(llm=llm, client=client, max_steps=30)
+    agent = MCPAgent(llm=llm, client=client, max_steps=30, verbose=True)
 
     # Run the query
-    result = await agent.run(
+    alfred_result = await agent.run(
         "output a dataframe for merchant Zalando in the last month",
         max_steps=30,
     )
-    print(f"\nResult: {result}")
+    # Save result to a file in /tmp
+    output_path = "./tmp/zalando_result.txt"
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(str(alfred_result))
+
+    print(f"\nResult saved to: {output_path}")
+
     # Static data
     data = {
         "Month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
@@ -146,9 +153,28 @@ async def create_slides(string: str, ctx: Context | None = None) -> dict:
 
     return {
         # "info": info,
+        "alfred_result": alfred_result,
         "pdf_path": pdf_path,
         "chart_file_id": chart_file_id,
         "chart_image_url": direct_url,
         "image_insertion_success": image_success,
         "presentation_id": output_file_id,
     }
+
+
+"""
+# 🔧 ENTRY POINT
+def main():
+    print("[DEBUG] Starting main function...")
+    try:
+        result = asyncio.run(create_slides("Here's your automated update!"))
+        print("\n[🎉] Final Result:")
+        for k, v in result.items():
+            print(f"  {k}: {v}")
+    except Exception as e:
+        print(f"[✗] Main function failed: {e}")
+        print(f"[DEBUG] Error type: {type(e).__name__}")
+
+if __name__ == "__main__":
+    main()
+"""
