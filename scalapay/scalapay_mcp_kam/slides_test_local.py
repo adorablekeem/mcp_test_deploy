@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import os
 import time
 import logging
@@ -11,6 +12,11 @@ from fastmcp import Context
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from mcp_use import MCPAgent, MCPClient
+from googleapiclient.http import MediaIoBaseDownload
+import io
+from plot_chart import plot_monthly_sales_chart
+from prompts.charts_prompt import MONTHLY_SALES_CHART_PROMPT, SLIDES_GENERATION_PROMPT
+import ast
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(message)s')
@@ -20,6 +26,10 @@ logger = logging.getLogger(__name__)
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./scalapay/scalapay_mcp_kam/credentials.json"
 drive_service = build("drive", "v3")
 
+@dataclass
+class SlidesContent:
+    paragraph: str = ""
+    structured_data: dict = None
 
 async def create_slides(string: str, starting_date: str, end_date: str, ctx: Context | None = None) -> dict:
     logger.debug("Starting create_slides function")
@@ -48,36 +58,44 @@ async def create_slides(string: str, starting_date: str, end_date: str, ctx: Con
 
     # Run the query
     alfred_result = await agent.run(
-        "output a dataframe for merchant Zalando in the last month",
-        max_steps=30,
+        MONTHLY_SALES_CHART_PROMPT.format(
+            merchant_token=string,
+        ),
+        max_steps=30
     )
+
     # Save result to a file in /tmp
-    output_path = "./tmp/zalando_result.txt"
+    output_path = "./tmp/alfred_result.txt"
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(str(alfred_result))
 
     print(f"\nResult saved to: {output_path}")
-
-    # Static data
-    data = {
-        "Month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-        "Sales": [4174, 4507, 1860, 2294, 2130, 3468],
-        "Profit": [1244, 321, 666, 1438, 530, 892],
-    }
-    df = pd.DataFrame(data)
     logger.debug("DataFrame created successfully")
 
     chart_path = "/tmp/monthly_sales_profit_chart.png"
     try:
-        plt.figure(figsize=(8, 5))
-        plt.plot(df["Month"], df["Sales"], marker="o", label="Sales")
-        plt.plot(df["Month"], df["Profit"], marker="o", label="Profit")
-        plt.title("Monthly Sales and Profit", fontsize=16)
-        plt.xlabel("Month", fontsize=12)
-        plt.ylabel("Amount", fontsize=12)
-        plt.legend()
-        plt.savefig(chart_path, dpi=300)
-        plt.close()
+        llm = llm.with_structured_output(SlidesContent)
+        try:
+            resp = await llm.ainvoke(SLIDES_GENERATION_PROMPT.format(
+                alfred_result=alfred_result
+            ))
+        except Exception as e:
+            logger.exception("Error invoking LLM for slides generation")
+            if ctx:
+                await ctx.error(f"❌ LLM invocation failed: {e}")
+            return {"error": "LLM invocation failed"}       
+        print(f"resp result is: {resp.get('structured_data', {})}")
+        raw_data = resp.get("structured_data", {}).get("months", {})
+
+        # Normalize: convert year keys to int
+        normalized_data = {
+            month: {int(year): val for year, val in yearly_data.items()}
+            for month, yearly_data in raw_data.items()
+        }
+        print(f"normalized_data is: {normalized_data}")
+        chart_path, width_px, height_px = plot_monthly_sales_chart(normalized_data, output_path=chart_path)
+        print(f"Chart size: {width_px}px × {height_px}px")
+
         logger.info(f"Chart saved to: {chart_path}")
         if ctx:
             await ctx.info("📈 Chart image generated")
@@ -93,7 +111,7 @@ async def create_slides(string: str, starting_date: str, end_date: str, ctx: Con
     try:
         output_file_id = Drive.copy_file(presentation_id, "final_presentation")
         Drive.move_file(output_file_id, folder_id)
-        Slides.batch_text_replace({"bot": string}, output_file_id)
+        Slides.batch_text_replace({"monthly_sales_paragraph": resp.get('paragraph', '')}, output_file_id)
         logger.info(f"Slides updated and moved: {output_file_id}")
         if ctx:
             await ctx.info("📄 Template duplicated and text replaced")
@@ -125,7 +143,12 @@ async def create_slides(string: str, starting_date: str, end_date: str, ctx: Con
 
     image_success = False
     try:
-        Slides.batch_replace_shape_with_image({"image1": direct_url, "image2": direct_url}, output_file_id)
+        Slides.batch_replace_shape_with_image(
+            {"monthly_sales_chart": direct_url},
+            output_file_id,
+            position=(144, 108),  # 2in X, 1.5in Y in pt
+            size=(400, 300)       # 400pt wide, 300pt high
+        )
         logger.info("Image inserted")
         if ctx:
             await ctx.info("🖼️ Chart inserted into slides")
@@ -139,15 +162,22 @@ async def create_slides(string: str, starting_date: str, end_date: str, ctx: Con
     try:
         info = Slides.get_presentation_info(output_file_id)
         pdf_path = f"/tmp/{output_file_id}.pdf"
-        Slides.download_presentation_as_pdf(drive_service, output_file_id, pdf_path)
-        logger.info("PDF exported")
+        request = drive_service.files().export_media(fileId=output_file_id, mimeType="application/pdf")
+        fh = io.FileIO(pdf_path, "wb")
+        downloader = MediaIoBaseDownload(fh, request)
+        
+        done = False
+        while not done:
+            status, done = downloader.next_chunk()
+            logger.debug(f"PDF Download Progress: {int(status.progress() * 100)}%")
+
+        logger.info(f"PDF exported to: {pdf_path}")
         if ctx:
             await ctx.info("📥 Slides exported as PDF")
     except Exception:
         logger.exception("PDF export failed")
         if ctx:
             await ctx.warning("⚠️ PDF export failed")
-
     if ctx:
         await ctx.info("✅ Slide generation complete")
 

@@ -6,7 +6,9 @@ from langchain_core.runnables import RunnableConfig
 import sys
 from fastmcp import Context
 from dataclasses import dataclass
+from markitdown import MarkItDown
 
+md = MarkItDown()
 import logging
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s %(name)s: %(message)s')
 logger = logging.getLogger(__name__)
@@ -22,16 +24,38 @@ config = RunnableConfig()
 @dataclass
 class UserInfo:
     merchant_token: str
-    start_date: str
-    end_date: str
+@mcp.tool(
+    annotations={
+        "title": "Read PDF Document",
+        "readOnlyHint": True,
+        "openWorldHint": False
+    }
+)
+def read_pdf(file_path: str) -> str:
+    """Read a PDF file and return the text content.
+    
+    Args:
+        file_path: Path to the PDF file to read
+    """
+    try:
+        # Expand the tilde (if part of the path) to the home directory path
+        expanded_path = os.path.expanduser(file_path)
+        
+        # Use markitdown to convert the PDF to text
+        return md.convert(expanded_path).text_content
+    except Exception as e:
+        # Return error message that the LLM can understand
+        return f"Error reading PDF: {str(e)}"
+
 
 @mcp.tool()
 async def create_slides_wrapper(merchant_token: str, starting_date: str, end_date:str, ctx: Context | None = None) -> dict:
     logger.info("create_slides_wrapper invoked")
     logger.debug(f"Input string: {merchant_token, ctx}")
     try:
-        from slides_test import create_slides
+        from slides_test_local import create_slides
         # TO-DO: Remove elicit part in production
+        
         result = await ctx.elicit(
             message="Please provide your information",
             response_type=UserInfo
@@ -79,11 +103,30 @@ async def serve_pdf(path: str):
         blob=base64.b64encode(data).decode("utf-8"),
     )
 
+@mcp.resource("file://{path}")
+def provide_recent_document(path: str):
+    """Provide access to a recently used document.
+    
+    This resource shows how to use path parameters to provide dynamic resources.
+    """
+    try:
+        # Construct the path to the recent documents folder
+        recent_docs_folder = os.path.expanduser("~/Documents/Recent")
+        file_path = os.path.join(recent_docs_folder, path)
+        
+        # Validate the file exists
+        if not os.path.exists(file_path):
+            return f"File not found: {file_path}"
+            
+        # Convert to text using markitdown
+        return md.convert(file_path).text_content
+    except Exception as e:
+        return f"Error accessing document: {str(e)}"
 
 if __name__ == "__main__":
     logger.info("🚀 Starting MCP server")
     try:
-        mcp.run(transport="streamable-http", host="0.0.0.0", port=8002)
+        mcp.run(transport="streamable-http", host="0.0.0.0", port=8005)
     except Exception:
         logger.exception("❌ MCP crashed")
         sys.exit(1)
