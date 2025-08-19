@@ -63,7 +63,7 @@ def plot_monthly_sales_chart(data: dict, output_path="/mnt/data/dynamic_chart_co
     height_px = int(fig_height_inch * dpi)
 
     return output_path, width_px, height_px
-
+"""
 if __name__ == "__main__":
     # Example usage
 
@@ -71,3 +71,4 @@ if __name__ == "__main__":
 
     output_path = "/tmp/chart.png"
     print(f"Chart saved to {output_path}")
+"""

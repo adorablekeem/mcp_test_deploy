@@ -1,5 +1,6 @@
 import base64
 import os
+import time
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 from langchain_core.runnables import RunnableConfig
@@ -7,6 +8,7 @@ import sys
 from fastmcp import Context
 from dataclasses import dataclass
 from markitdown import MarkItDown
+from starlette.responses import JSONResponse
 
 md = MarkItDown()
 import logging
@@ -18,8 +20,22 @@ mcp = FastMCP("company-intelligence", instructions="""
         This server allows to create slides about merchants given the merchant token and the period.
         Call create_slides_wrapper() to generate the slides, considering that the tool will take a dataframe from another mcp server (alfred). Call this tool only when you have the merchant token and the period given by the user. don't make them up.
                
-    """)
+    """, stateless_http=True)
 config = RunnableConfig()
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(request):
+    return JSONResponse({
+        "status": "healthy", 
+        "service": "company-intelligence",
+        "version": "1.0.0",
+        "timestamp": time.time(),
+        "services": {
+            "slides_creation": "available",
+            "pdf_reading": "available",
+            "google_drive": "available"
+        }
+    })
 
 @dataclass
 class UserInfo:
@@ -49,26 +65,18 @@ def read_pdf(file_path: str) -> str:
 
 
 @mcp.tool()
-async def create_slides_wrapper(merchant_token: str, starting_date: str, end_date:str, ctx: Context | None = None) -> dict:
+async def create_slides_wrapper(merchant_token: str, starting_date: str, end_date: str, ctx: Context | None = None) -> dict:
     logger.info("create_slides_wrapper invoked")
     logger.debug(f"Input string: {merchant_token, ctx}")
     try:
-        from slides_test_local import create_slides
-        # TO-DO: Remove elicit part in production
+        from slides_test import create_slides
         
-        result = await ctx.elicit(
-            message="Please provide your information",
-            response_type=UserInfo
-        )
-        if result.action == "accept":
-            result_slides = await create_slides(merchant_token, starting_date, end_date, ctx=ctx)
-            pdf_path = result_slides.get("pdf_path")
-            logger.info("Slides created successfully with PDF: %s", pdf_path)
-            ctx.info("Slides created successfully")
-        elif result.action == "decline":
-            return "Information not provided"
-        else:
-            return "Operation cancelled"
+        # Skip elicit for HTTP calls - go directly to slides creation
+        result_slides = await create_slides(merchant_token, starting_date, end_date, ctx=ctx)
+        pdf_path = result_slides.get("pdf_path")
+        logger.info("Slides created successfully with PDF: %s", pdf_path)
+        if ctx:
+            await ctx.info("Slides created successfully")
 
         return {
             "message": "Slides created successfully",
@@ -77,11 +85,9 @@ async def create_slides_wrapper(merchant_token: str, starting_date: str, end_dat
             "alfred_result": result_slides.get("alfred_result", {}),
             "chart_file_id": result_slides.get("chart_file_id", "N/A"),
             "chart_image_url": result_slides.get("chart_image_url", "N/A"),
-            # "info": result.get("info", {}),
         }
     except Exception as e:
         logger.exception("Error in create_slides_wrapper")
-        # if within an MCP tool, optionally send to client
         if ctx is not None:
             await ctx.error(f"create_slides_wrapper failed: {e}")
         return {"error": "Slides creation failed"}
@@ -126,7 +132,7 @@ def provide_recent_document(path: str):
 if __name__ == "__main__":
     logger.info("🚀 Starting MCP server")
     try:
-        mcp.run(transport="streamable-http", host="0.0.0.0", port=8005)
+        mcp.run(transport="http", host="0.0.0.0", port=8005)
     except Exception:
         logger.exception("❌ MCP crashed")
         sys.exit(1)

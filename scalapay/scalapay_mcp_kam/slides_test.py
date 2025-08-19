@@ -16,7 +16,9 @@ logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
 # Set credentials
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/etc/secrets/credentials.json"
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/etc/secrets/credentials.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./scalapay/scalapay_mcp_kam/credentials.json"
+
 drive_service = build("drive", "v3")
 
 
@@ -147,7 +149,7 @@ async def create_slides(merchant_token: str, starting_date: str, end_date:str, c
         await ctx.info("✅ Slide generation complete")
 
     return {
-        # "info": info,
+        "info": info,
         "pdf_path": pdf_path,
         "chart_file_id": chart_file_id,
         "chart_image_url": direct_url,
