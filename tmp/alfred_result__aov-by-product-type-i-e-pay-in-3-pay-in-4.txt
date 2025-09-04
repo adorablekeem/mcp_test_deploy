@@ -1,0 +1,6 @@
+{
+    'structured_data': {
+        'pay-in-3': {'AOV': 73.67}
+    },
+    'paragraph': 'The data represents the Average Order Value (AOV) for the pay-in-3 product type offered by the merchant "2L8082NCG" between January 2023 and June 2025. The AOV for the pay-in-3 option is approximately 73.67, indicating a moderate purchase amount per transaction. This value suggests the product is appealing to consumers seeking manageable installment payments, potentially supporting higher ticket purchases without upfront burdens. The consistency in AOV reflects stable consumer behavior and an effective pricing strategy.'
+}

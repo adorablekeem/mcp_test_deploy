@@ -1,0 +1,7 @@
+{
+  "monthly sales over time": {
+    "errors": [
+      "Prompt format error: missing key 'missing_placeholder'"
+    ]
+  }
+}

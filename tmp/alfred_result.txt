@@ -1,16 +1,11 @@
-```json
 {
-'Jan': {2023: 1061, 2024: 2051, 2025: 1190},
-'Feb': {2023: 869, 2024: 2516, 2025: 3879},
-'Mar': {2023: 744, 2024: 2017, 2025: 4392},
-'Apr': {2023: 722, 2024: 2836, 2025: 4266},
-'May': {2023: 4562, 2024: 2022, 2025: 3406},
-'Jun': {2023: 4155, 2024: 2747, 2025: 4048},
-'Jul': {2023: 4330, 2024: 2564, 2025: 1966},
-'Aug': {2023: 1716, 2024: 2497},
-'Sep': {2023: 2450, 2024: 2937},
-'Oct': {2023: 2793, 2024: 2399},
-'Nov': {2022: 260, 2023: 2804, 2024: 1652},
-'Dec': {2022: 1418, 2023: 2752, 2024: 3689}
+    'structured_data': {
+        'Jan': {2025: 138.56},
+        'Feb': {2025: 141.69},
+        'Mar': {2025: 142.2},
+        'Apr': {2025: 109.9},
+        'May': {2025: 134.96},
+        'Jun': {2025: 63.43},
+    },
+    'paragraph': 'Analysis of the sales trends for the merchant "2L8082NCG" from January to June 2025 indicates varying performance across the months. March recorded the highest sales with 142.2, suggesting peak business activities or successful promotional strategies. Meanwhile, June exhibited the lowest sales at 63.43, potentially reflecting seasonal downturns or logistical challenges. Despite a noticeable dip in April to 109.9 compared to the earlier months, May showed an encouraging recovery before the further decline in June. This fluctuation underscores the importance of adaptive business strategies to counteract seasonal or market changes.'
 }
-```

@@ -1,0 +1,7 @@
+{
+  "monthly sales over time": {
+    "errors": [
+      "Agent run failed: 'MockMCPClient' object has no attribute 'get_all_active_sessions'"
+    ]
+  }
+}

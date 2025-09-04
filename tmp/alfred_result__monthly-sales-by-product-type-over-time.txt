@@ -1,0 +1,17 @@
+{
+    'structured_data': {
+        'Jan': {'2023': {'pay-in-3': 731.90}, '2024': {'pay-in-3': 2566.67}, '2025': {'pay-in-3': 4373.69}},
+        'Feb': {'2023': {'pay-in-3': 590.43}, '2024': {'pay-in-3': 1859.86}, '2025': {'pay-in-3': 4162.34}},
+        'Mar': {'2023': {'pay-in-3': 619.63}, '2024': {'pay-in-3': 2548.51}, '2025': {'pay-in-3': 4099.35}},
+        'Apr': {'2023': {'pay-in-3': 3937.45}, '2024': {'pay-in-3': 1787.84}, '2025': {'pay-in-3': 3253.25}},
+        'May': {'2023': {'pay-in-3': 3989.45}, '2024': {'pay-in-3': 2543.65}, '2025': {'pay-in-3': 4047.04}},
+        'Jun': {'2023': {'pay-in-3': 4117.48}, '2024': {'pay-in-3': 2348.38}, '2025': {'pay-in-3': 1790.69}},
+        'Jul': {'2023': {'pay-in-3': 1625.14}, '2024': {'pay-in-3': 2450.29}},
+        'Aug': {'2023': {'pay-in-3': 2290.14}, '2024': {'pay-in-3': 2794.76}},
+        'Sep': {'2023': {'pay-in-3': 2748.03}, '2024': {'pay-in-3': 2267.68}},
+        'Oct': {'2023': {'pay-in-3': 2700.64}, '2024': {'pay-in-3': 1531.72}},
+        'Nov': {'2023': {'pay-in-3': 2405.15}, '2024': {'pay-in-3': 3957.13}},
+        'Dec': {'2023': {'pay-in-3': 1926.86}, '2024': {'pay-in-3': 1114.41}}
+    },
+    'paragraph': 'The monthly sales by product type reveal a strong performance in sales consistently rising from 2023 through to 2025, with the \"pay-in-3\" option harnessing substantial revenue in almost every month across the years. Notably, the months of May and June in 2023 saw prominent peaks which align with potential mid-year sales strategies or promotions. Similarly, January 2025 brought in the highest sales figures indicating a successful start to the year. However, some months like February 2023 and December 2024 saw relatively lower figures, possibly reflecting seasonal buying patterns or changes in consumer demand.'
+}

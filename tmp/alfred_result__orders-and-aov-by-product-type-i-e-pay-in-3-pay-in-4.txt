@@ -1,0 +1,11 @@
+{
+    'structured_data': {
+        'Jan': {2025: {'pay-in-3': {'orders': 84, 'aov': 50.38}}},
+        'Feb': {2025: {'pay-in-3': {'orders': 88, 'aov': 48.63}}},
+        'Mar': {2025: {'pay-in-3': {'orders': 99, 'aov': 43.39}}},
+        'Apr': {2025: {'pay-in-3': {'orders': 100, 'aov': 33.02}}},
+        'May': {2025: {'pay-in-3': {'orders': 66, 'aov': 62.58}}},
+        'Jun': {2025: {'pay-in-3': {'orders': 45, 'aov': 41.92}}}
+    },
+    'paragraph': 'The analysis from January to June 2025 for the merchant "2L8082NCG" indicates a consistent preference for the "pay-in-3" product type. January and May showed the highest Average Order Value (AOV), suggesting promotional or high-value order periods. Orders were highest in April, suggesting periodic increases in consumer activity. The fluctuating AOV across these months suggests shifts in consumer spending patterns, requiring further analysis to optimize sales strategy.'
+}

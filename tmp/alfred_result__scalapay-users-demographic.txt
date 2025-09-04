@@ -1,0 +1,21 @@
+{
+    'structured_data': {
+        "Age in percentages": {
+            "18-24": 12,
+            "25-34": 35,
+            "35-44": 25,
+            "45-54": 18,
+            "55-64": 10
+        },
+        "Gender in percentages": {
+            "M": 45,
+            "F": 55
+        },
+        "Card type in percentages": {
+            "credit": 52,
+            "debit": 30,
+            "prepaid": 18
+        }
+    },
+    'paragraph': 'Between January 2023 and June 2025, the demographic data for Scalapay users of merchant "2L8082NCG" shows a significant concentration of users aged 25-34, representing 35% of the user base, likely due to targeted marketing strategies. The gender distribution indicates a slight predominance of female users at 55%. Credit card usage is notably the highest among users at 52%, compared to debit and prepaid options, suggesting a preference towards credit facilities.'
+}

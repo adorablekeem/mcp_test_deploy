@@ -7,6 +7,13 @@
 		"test-kam": {
 			"url": "http://0.0.0.0:8005/mcp",
 			"type": "http"
+		},
+		"google-slides": {
+			"url": "http://0.0.0.0:8006/mcp",
+			"type": "http",
+			"env": {
+				"GOOGLE_APPLICATION_CREDENTIALS": "/Users/keem.adorable@scalapay.com/scalapay/scalapay_mcp_kam/scalapay/scalapay_mcp_kam/credentials.json"
+			}
 		}
 	},
 	"inputs": []
