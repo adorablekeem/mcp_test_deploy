@@ -1,17 +1,5 @@
 {
-    'structured_data': {
-        'Jan': {'2023': 34.25, '2024': 66.19, '2025': 38.4},
-        'Feb': {'2023': 31.05, '2024': 86.78, '2025': 138.56},
-        'Mar': {'2023': 24.03, '2024': 65.09, '2025': 141.69},
-        'Apr': {'2023': 24.09, '2024': 94.55, '2025': 142.2},
-        'May': {'2023': 147.19, '2024': 65.24, '2025': 109.9},
-        'Jun': {'2023': 138.53, '2024': 91.57, '2025': 134.96},
-        'Jul': {'2023': 139.69, '2024': 82.73},
-        'Aug': {'2023': 55.38, '2024': 80.56},
-        'Sep': {'2023': 81.69, '2024': 97.92},
-        'Oct': {'2023': 90.11, '2024': 77.41},
-        'Nov': {'2023': 93.48, '2024': 55.07},
-        'Dec': {'2023': 88.8, '2024': 119.02}
-    },
-    'paragraph': 'The data shows a mix of fluctuating trends over the observed period. In 2023, there was a significant sales peak in May and June followed by a relatively stable period. The year 2024 appears more stable overall, with an exceptional spike in April and a notable peak in December. The first half of 2025 indicates an increasing trend, with February to June showing a rising pattern pointing to potential growth in sales activity.'
+'structured_data': {
+},
+'paragraph': ''
 }

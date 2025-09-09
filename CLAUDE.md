@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Python project called `scalapay_mcp_kam` that provides sales automation for Scalapay merchants. It's built as a Model Context Protocol (MCP) server that integrates with Google Slides API, OpenAI, and data analytics tools to generate automated business intelligence reports and presentations.
+This is a Python project called `scalapay_mcp_kam` that provides automated business intelligence slide generation for Scalapay merchants. It's an MCP (Model Context Protocol) server that orchestrates the complete pipeline from user elicitation to slide delivery through integration with multiple specialized MCP servers and APIs.
 
 ## Development Setup
 
@@ -46,46 +46,39 @@ poetry install
 - `make clean` - Clean all build artifacts and caches
 - `make .venv` - Set up poetry virtual environment
 
-## Architecture Overview
+## Core Architecture
 
-### Core Components
+### Primary MCP Server (`mcp_server.py`)
+- FastMCP-based orchestrator running on port 8002
+- Handles user elicitation for merchant token and date ranges
+- Exposes `create_slides_wrapper()` tool as main entry point
+- Serves generated PDF files via resource endpoints
 
-**MCP Server (`company_intelligence.py`)**
-- FastMCP-based server running on port 8002
-- Main entry point for slide generation workflows
-- Handles merchant token validation and date range processing
+### Agent-Based Processing (`agents/`)
+- **Google Slides Agent**: Template management and slide assembly
+- **Alfred Agent**: Data retrieval coordination with Snowflake MCP
+- **Chart Agent**: Matplotlib visualization generation
 
-**Slide Generation (`slides_test.py`)**
-- Orchestrates the complete slide creation pipeline
-- Integrates with Google Slides API and Drive API
-- Uses OpenAI GPT-4 models for content generation
-- Coordinates with Alfred MCP server for data retrieval
+### Tools System (`tools/`)
+- Modular query builders for structured data requests
+- Chart-specific utilities with dynamic prompt generation
+- Schema definitions for data validation and processing
+- Error handling and retry mechanisms
 
-**Chart Generation (`charts.py`, `plot_chart.py`)**
-- Matplotlib-based chart creation
-- Automated data visualization from merchant analytics
-- Integration with Google Drive for chart storage
+## Key Integrations
 
-**Tools Directory (`tools/`)**
-- Modular utilities for specific functionality
-- Chart utilities, Alfred automation, error handling
-- Reusable schemas and processing components
+### External MCP Servers
+- **Alfred MCP** (localhost:8000): Snowflake data warehouse interface
+- **Charts MCP**: Specialized matplotlib chart generation service
 
-### Key Integrations
+### Google APIs
+- **Google Slides API**: Template-based presentation creation
+- **Google Drive API**: Chart storage and sharing management
+- **OAuth2 Authentication**: Secure API access management
 
-- **Google APIs**: Slides, Drive, and authentication via oauth2client
-- **OpenAI**: GPT-4 models for content analysis and generation  
-- **Alfred MCP**: External data source (runs on localhost:8000)
-- **FastMCP**: MCP server framework for tool orchestration
-
-### Data Flow
-
-1. User requests slides via `create_slides_wrapper()` with merchant token and date range
-2. System connects to Alfred MCP server to retrieve merchant data
-3. Data is processed and structured using OpenAI models
-4. Charts are generated using matplotlib and uploaded to Google Drive
-5. Google Slides presentation is created and populated with data and charts
-6. Final PDF export is generated and served via MCP resource endpoint
+### AI Services
+- **OpenAI GPT-4**: Dynamic content generation and data analysis
+- **Dynamic Prompting**: Context-aware chart and text generation
 
 ## Configuration Notes
 
@@ -98,11 +91,18 @@ poetry install
 ## MCP Server Usage
 
 Start the server:
-```python
-# In company_intelligence.py
-mcp.run(transport="streamable-http", host="0.0.0.0", port=8002)
+```bash
+python scalapay/scalapay_mcp_kam/mcp_server.py
 ```
 
 The server exposes:
-- `create_slides_wrapper()` tool for slide generation
-- `serve_pdf()` resource for PDF file serving
+- `create_slides_wrapper(merchant_token, starting_date, end_date)` - Main slide generation tool
+- `serve_pdf(path)` - PDF file serving resource
+
+## Development Notes
+
+- Each chart type has specific data structure requirements
+- Slide templates use placeholder-based content replacement
+- Dynamic prompt generation adapts to chart types and data contexts
+- Error handling includes retry mechanisms for API failures
+- All generated artifacts are stored with unique identifiers

@@ -40,6 +40,27 @@ Note: If data for a year doesn't exist, use "N/A" for that year's variation.
 STRUCTURED_CHART_SCHEMA_PROMPT = """
 You are a chart planning assistant. 
 Given a user request and some data preview, decide the best chart configuration.
+**CRITICAL REQUIREMENTS:**
+1. Use ONLY valid matplotlib styles - DO NOT use deprecated seaborn styles
+2. Prioritize raw data over percentage-converted data for accurate visualization
+3. Create clean, professional charts suitable for business presentations
+
+**VALID MATPLOTLIB STYLES TO USE:**
+- 'default' (recommended for professional look)
+- 'classic'
+- 'bmh'
+- 'ggplot'
+- 'seaborn-v0_8' (if seaborn styling needed)
+
+**FORBIDDEN STYLES:**
+- 'seaborn-whitegrid' (deprecated and will cause errors)
+- 'seaborn-white' (deprecated)
+- Any other 'seaborn-*' styles without version suffix
+
+**Data Source Priority:**
+1. First check for 'alfred_raw' data (contains original raw values)
+2. If unavailable, use 'slides_struct' but verify data format
+3. Ensure numerical values are not in percentage string format
 
 Mapping rules:
 - "monthly sales over time" → bar
@@ -203,6 +224,40 @@ Include text analysis highlighting:
 - Can include trend lines or additional statistical overlays
 - Suitable for quarterly, weekly, or other temporal groupings
 - Enhanced with YoY analysis components for comprehensive business intelligence
+"""
+
+SLIDE_CONTENT_OPTIMIZATION_PROMPT = """
+You are a presentation expert optimizing analytical content for slide display.
+
+TASK: Transform the detailed analytical paragraph into slide-appropriate content that:
+1. Highlights 2-3 key insights maximum
+2. Uses clear, concise language (40-80 words ideal)
+3. Focuses on actionable insights rather than raw data
+4. Maintains professional tone suitable for business presentations
+
+CONTEXT:
+- Slide Title: {title}
+- Chart Type: {chart_type}  
+- Position in Presentation: {slide_index} of {total_slides}
+- Audience Level: Executive/Management
+
+ORIGINAL ANALYTICAL CONTENT:
+{full_paragraph}
+
+CHART DATA SUMMARY:
+{structured_data_summary}
+
+OUTPUT REQUIREMENTS:
+- slide_paragraph: Optimized text for slide display (40-80 words)
+- key_insights: List of 2-3 main takeaways
+- presenter_notes_addition: Additional context for speaker notes (if needed)
+
+Return as JSON format:
+{{
+    "slide_paragraph": "...",
+    "key_insights": ["...", "...", "..."],
+    "presenter_notes_addition": "..."
+}}
 """
 
 ORDERS_BY_USER_TYPE_PROMPT = """Performance Dashboard with Stacked Bar Chart and Pie Chart - Complete Guide
