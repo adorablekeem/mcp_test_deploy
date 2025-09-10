@@ -1,6 +1,6 @@
 {
     'structured_data': {
-        'pay-in-3': 72.67064814814815
+        'pay-in-3': 72.67
     },
-    'paragraph': 'For the merchant "2L8082NCG" from 2023-01-01 to 2025-06-30, the Average Order Value (AOV) for the product type "pay-in-3" is approximately 72.67. This indicates that on average, customers spend around this amount when opting to pay for their purchases in three installments. This trend reflects a consistent consumer behavior regarding payment choices and could suggest a preference or suitability of the pay-in-3 option for the merchant\'s customer demographic during this period.'
+    'paragraph': 'The Average Order Value (AOV) for the merchant "2L8082NCG" using the "pay-in-3" product type from January 1, 2023, to June 30, 2025, is approximately 72.67. This indicates a stable preference for the "pay-in-3" product type among customers, suggesting consistent consumer behavior and potentially a well-received payment option during the evaluated timeframe.'
 }

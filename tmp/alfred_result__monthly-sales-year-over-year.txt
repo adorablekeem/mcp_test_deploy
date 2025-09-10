@@ -1,37 +1,41 @@
 {
     'structured_data': {
-        'monthly_sales': [
-            {'month': '2023-01', 'total_sales': 34.25},
-            {'month': '2023-02', 'total_sales': 31.05},
-            {'month': '2023-03', 'total_sales': 24.03},
-            {'month': '2023-04', 'total_sales': 24.09},
-            {'month': '2023-05', 'total_sales': 147.19},
-            {'month': '2023-06', 'total_sales': 138.53},
-            {'month': '2023-07', 'total_sales': 139.69},
-            {'month': '2023-08', 'total_sales': 55.38},
-            {'month': '2023-09', 'total_sales': 81.69},
-            {'month': '2023-10', 'total_sales': 90.11},
-            {'month': '2023-11', 'total_sales': 93.48},
-            {'month': '2023-12', 'total_sales': 88.8},
-            {'month': '2024-01', 'total_sales': 66.19},
-            {'month': '2024-02', 'total_sales': 86.78},
-            {'month': '2024-03', 'total_sales': 65.09},
-            {'month': '2024-04', 'total_sales': 94.55},
-            {'month': '2024-05', 'total_sales': 65.24},
-            {'month': '2024-06', 'total_sales': 91.57},
-            {'month': '2024-07', 'total_sales': 82.73},
-            {'month': '2024-08', 'total_sales': 80.56},
-            {'month': '2024-09', 'total_sales': 97.92},
-            {'month': '2024-10', 'total_sales': 77.41},
-            {'month': '2024-11', 'total_sales': 55.07},
-            {'month': '2024-12', 'total_sales': 119.02},
-            {'month': '2025-01', 'total_sales': 38.4},
-            {'month': '2025-02', 'total_sales': 138.56},
-            {'month': '2025-03', 'total_sales': 141.69},
-            {'month': '2025-04', 'total_sales': 142.2},
-            {'month': '2025-05', 'total_sales': 109.9},
-            {'month': '2025-06', 'total_sales': 134.96}
-        ]
+        '2023': {
+            'January': 1061.75,
+            'February': 869.4,
+            'March': 744.93,
+            'April': 722.7,
+            'May': 4562.89,
+            'June': 4155.9,
+            'July': 4330.39,
+            'August': 1716.78,
+            'September': 2450.7,
+            'October': 2793.41,
+            'November': 2804.4,
+            'December': 2752.8
+        },
+        '2024': {
+            'January': 2051.89,
+            'February': 2516.62,
+            'March': 2017.79,
+            'April': 2836.5,
+            'May': 2022.44,
+            'June': 2747.1,
+            'July': 2564.63,
+            'August': 2497.36,
+            'September': 2937.6,
+            'October': 2399.71,
+            'November': 1652.1,
+            'December': 3689.62
+        },
+        '2025': {
+            'January': 1190.4,
+            'February': 3879.68,
+            'March': 4392.39,
+            'April': 4266.0,
+            'May': 3406.9,
+            'June': 4048.8
+        }
     },
-    'paragraph': 'Analyzing the monthly sales data for merchant "2L8082NCG" from January 2023 to June 2025 reveals a fluctuating yet generally upward trend in sales. In 2023, the merchant saw an increase in sales through the first half of the year, peaking in May and June. This was followed by a downturn during the late-summer months; however, sales picked up towards the end of 2023. The year 2024 started relatively strong, with January sales exceeding that of the previous year, and maintained a steady performance throughout. It is notable that the sales remained relatively consistent in the first half of 2025 compared to the same period in 2024. Overall, while there are fluctuations, especially noticeable during certain periods of the year, the merchant has shown resilience and growth, particularly in the post-winter months of each year.'
+    'paragraph': 'The sales data for the merchant 2L8082NCG from January 2023 to June 2025 shows variability in monthly sales figures. In 2023, a peak was observed in May with a revenue of 4562.89, followed by a considerable fluctuation throughout the year, ending with a minor decline in December. The year 2024 demonstrated a more balanced sales trend with two peaks in April and December. However, 2025 indicates a rising trend in sales, with substantial growth noted in February and March. Overall, the merchant displays resilience and potential growth, with key months of success across the observed period.'
 }

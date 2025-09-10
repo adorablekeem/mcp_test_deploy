@@ -1,22 +1,6 @@
 {
     'structured_data': {
-        'demographics': [
-            {
-                'gender': 'F',
-                'country_code': 'ES',
-                'user_percentage': 83.061
-            },
-            {
-                'gender': null,
-                'country_code': 'ES',
-                'user_percentage': 7.1351
-            },
-            {
-                'gender': 'M',
-                'country_code': 'ES',
-                'user_percentage': 9.8039
-            }
-        ]
+        
     },
-    'paragraph': 'The demographic analysis for Scalapay users of the merchant "2L8082NCG" between January 1, 2023, and June 30, 2025, shows a significant female user base, comprising approximately 83.06% of the total users from Spain (ES). Male users account for around 9.80%, while users whose gender is unspecified make up about 7.13%. This pattern indicates a strong preference among female users for using Scalapay services with this merchant, reflecting potential marketing or product alignment that favors this demographic group.'
+    'paragraph': ''  
 }

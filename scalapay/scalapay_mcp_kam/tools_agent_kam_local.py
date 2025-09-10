@@ -33,7 +33,7 @@ logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
 # Set credentials
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./scalapay/scalapay_mcp_kam/credentials.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/etc/secrets/credentials.json"
 drive_service = build("drive", "v3")
 slides_service = build("slides", "v1")
 

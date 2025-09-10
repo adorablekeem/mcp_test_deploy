@@ -64,41 +64,7 @@ def build_correct_image_positioning_request(
     }
 
 
-def build_correct_image_transform_request(
-    image_object_id: str,
-    image_style_config: Dict[str, Any],
-    data_type: str
-) -> Dict[str, Any]:
-    """
-    Build correct Google Slides API request for image transformation (positioning).
-    
-    This is separate from sizing and handles position/translation.
-    """
-    resize_config = image_style_config.get("resize", {})
-    
-    translate_x = resize_config.get("translateX", 200)
-    translate_y = resize_config.get("translateY", 200)
-    unit = resize_config.get("unit", "PT")
-    
-    logger.debug(f"Building transform request for {data_type}: "
-                f"position=({translate_x}, {translate_y} {unit})")
-    
-    return {
-        "updateImageProperties": {
-            "objectId": image_object_id,
-            "imageProperties": {
-                # Set position using transform
-                "transform": {
-                    "scaleX": 1.0,  # No scaling, just positioning
-                    "scaleY": 1.0,  # No scaling, just positioning
-                    "translateX": translate_x,
-                    "translateY": translate_y,
-                    "unit": unit
-                }
-            },
-            "fields": "transform"
-        }
-    }
+# Removed build_correct_image_transform_request - now using combined request in build_correct_image_positioning_request
 
 
 def find_image_object_ids_in_slide(slide_data: Dict[str, Any]) -> List[str]:
@@ -157,7 +123,6 @@ async def apply_chart_specific_positioning_correctly(
         
         # Build positioning requests for each image
         positioning_requests = []
-        transform_requests = []
         styles_applied = 0
         
         # Use slug mapper for better token matching
@@ -204,17 +169,11 @@ async def apply_chart_specific_positioning_correctly(
                 # This is the corrected approach - apply the styling broadly
                 for slide_id, image_object_ids in slide_to_images.items():
                     for image_object_id in image_object_ids:
-                        # Build size request
-                        size_request = build_correct_image_positioning_request(
+                        # Build combined size and position request (all in one transform)
+                        combined_request = build_correct_image_positioning_request(
                             image_object_id, image_style_config, data_type
                         )
-                        positioning_requests.append(size_request)
-                        
-                        # Build transform request  
-                        transform_request = build_correct_image_transform_request(
-                            image_object_id, image_style_config, data_type
-                        )
-                        transform_requests.append(transform_request)
+                        positioning_requests.append(combined_request)
                         
                         styles_applied += 1
                         
@@ -225,32 +184,13 @@ async def apply_chart_specific_positioning_correctly(
             else:
                 logger.warning(f"[{corr_id}] No metadata match found for token: {token}")
         
-        # Execute positioning requests in batches
+        # Execute positioning requests in batches (combined size + position)
         total_requests_executed = 0
         
-        # First, apply all size changes
         if positioning_requests:
-            logger.info(f"[{corr_id}] Applying {len(positioning_requests)} size requests")
+            logger.info(f"[{corr_id}] Applying {len(positioning_requests)} combined size and position requests")
             for i in range(0, len(positioning_requests), 5):  # Batch of 5
                 batch = positioning_requests[i:i + 5]
-                
-                await asyncio.get_event_loop().run_in_executor(
-                    None,
-                    lambda: slides_service.presentations().batchUpdate(
-                        presentationId=presentation_id,
-                        body={"requests": batch}
-                    ).execute()
-                )
-                total_requests_executed += len(batch)
-                
-                # Small delay between batches
-                await asyncio.sleep(0.5)
-        
-        # Then, apply all transform changes
-        if transform_requests:
-            logger.info(f"[{corr_id}] Applying {len(transform_requests)} transform requests")
-            for i in range(0, len(transform_requests), 5):  # Batch of 5
-                batch = transform_requests[i:i + 5]
                 
                 await asyncio.get_event_loop().run_in_executor(
                     None,
@@ -272,7 +212,6 @@ async def apply_chart_specific_positioning_correctly(
             "styles_applied": styles_applied,
             "api_calls": total_requests_executed,
             "positioning_requests": len(positioning_requests),
-            "transform_requests": len(transform_requests),
             "processing_mode": "corrected_chart_positioning",
             "correlation_id": corr_id
         }
