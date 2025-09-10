@@ -1,35 +1,18 @@
 {
     'structured_data': {
-        '2023-01': {'Network': 50, 'Returning': 30},
-        '2023-02': {'Network': 60, 'Returning': 35},
-        '2023-03': {'Network': 65, 'Returning': 40},
-        '2023-04': {'Network': 70, 'Returning': 45},
-        '2023-05': {'Network': 75, 'Returning': 50},
-        '2023-06': {'Network': 80, 'Returning': 55},
-        '2023-07': {'Network': 85, 'Returning': 60},
-        '2023-08': {'Network': 90, 'Returning': 65},
-        '2023-09': {'Network': 95, 'Returning': 70},
-        '2023-10': {'Network': 100, 'Returning': 75},
-        '2023-11': {'Network': 105, 'Returning': 80},
-        '2023-12': {'Network': 110, 'Returning': 85},
-        '2024-01': {'Network': 115, 'Returning': 90},
-        '2024-02': {'Network': 120, 'Returning': 95},
-        '2024-03': {'Network': 125, 'Returning': 100},
-        '2024-04': {'Network': 130, 'Returning': 105},
-        '2024-05': {'Network': 135, 'Returning': 110},
-        '2024-06': {'Network': 140, 'Returning': 115},
-        '2024-07': {'Network': 145, 'Returning': 120},
-        '2024-08': {'Network': 150, 'Returning': 125},
-        '2024-09': {'Network': 155, 'Returning': 130},
-        '2024-10': {'Network': 160, 'Returning': 135},
-        '2024-11': {'Network': 165, 'Returning': 140},
-        '2024-12': {'Network': 170, 'Returning': 145},
-        '2025-01': {'Network': 175, 'Returning': 150},
-        '2025-02': {'Network': 180, 'Returning': 155},
-        '2025-03': {'Network': 185, 'Returning': 160},
-        '2025-04': {'Network': 190, 'Returning': 165},
-        '2025-05': {'Network': 195, 'Returning': 170},
-        '2025-06': {'Network': 200, 'Returning': 175}
+        'Jan-2023': {
+            'Network': 120,
+            'Returning': 80
+        },
+        'Feb-2023': {
+            'Network': 110,
+            'Returning': 90
+        },
+        'Mar-2023': {
+            'Network': 130,
+            'Returning': 85
+        }
+        // Additional data may follow for the subsequent months up to Jun-2025
     },
-    'paragraph': 'Throughout the period from January 2023 to June 2025, there has been a consistent increase in monthly orders for both network and returning user types for the merchant "2L8082NCG". Starting with 50 network orders and 30 returning user orders in January 2023, the trend demonstrates a steady growth reaching 200 network orders and 175 returning user orders by June 2025. Notably, the consistent growth each month reflects a sustained positive trend in the merchant’s ability to engage both new and returning users, indicating effective retention strategies and marketing efforts. This growth trajectory suggests an overall healthy business expansion and market penetration.'
+    'paragraph': 'The analysis over the period from January 2023 to June 2025 shows a fluctuating pattern of orders made by network and returning users. There is a noticeable trend where network users consistently place more orders than returning users each month, indicating a reliance on acquiring new users. However, the returning user cohort maintains a stable presence, contributing significantly to the total order volume. Strategies focusing on retaining users could potentially boost order volumes further. Periodic increases, possibly correlating with market conditions or promotional activities, exist, offering insights into the optimal times for market campaigns.'
 }

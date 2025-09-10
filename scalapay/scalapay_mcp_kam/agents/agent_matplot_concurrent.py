@@ -8,11 +8,13 @@ import logging
 import os
 import json
 import shutil
+import time
 from typing import Dict, List, Any, Optional, Tuple
 from langchain_openai import ChatOpenAI
 from mcp_use import MCPAgent, MCPClient
 
 from ..agents.agent_matplot import _safe_json_loads_maybe_single_quotes
+from ..prompts.charts_prompt import STRUCTURED_CHART_SCHEMA_PROMPT, MONTHLY_SALES_PROMPT
 from ..utils.concurrency_utils import (
     ConcurrencyManager, 
     ResourcePool, 
@@ -44,7 +46,8 @@ async def generate_single_chart(
     llm: ChatOpenAI,
     operation: str,
     max_steps: int,
-    correlation_id: str = None
+    correlation_id: str = None,
+    debug_folder: str = None
 ) -> Tuple[str, Dict[str, Any]]:
     """
     Generate a single chart concurrently.
@@ -109,11 +112,25 @@ async def generate_single_chart(
         logger.debug(f"[{corr_id}] Calling chart tool for {data_type}")
         
         # Use the same args structure as the original sequential version
+        # Configure workspace based on debug folder if provided
+        workspace_name = debug_folder if debug_folder else "chart_generation"
+        
+        # Create debug folder if specified and doesn't exist
+        if debug_folder:
+            debug_path = os.path.join(os.getcwd(), debug_folder)
+            if not os.path.exists(debug_path):
+                try:
+                    os.makedirs(debug_path, exist_ok=True)
+                    logger.info(f"[{corr_id}] Created debug folder: {debug_path}")
+                except Exception as e:
+                    logger.warning(f"[{corr_id}] Failed to create debug folder {debug_path}: {e}")
+                    workspace_name = "chart_generation"  # Fallback to default
+        
         args = {
             "instruction": chart_instruction,
             "chart_type": "auto",
             "model_type": "gpt-4o",
-            "workspace_name": "chart_generation",
+            "workspace_name": workspace_name,
         }
         
         # Try the same calling patterns as the original
@@ -167,13 +184,30 @@ async def generate_single_chart(
                         "Chart path points to a sandbox link (not a local file on this system)."
                     )
         
-        # Persist/copy PNG into ./plots and set chart_path
+        # Persist/copy PNG into execution-specific folder with tracking
         try:
             if returned_path:
-                chart_path = _persist_plot_ref(data_type, returned_path)
+                # Use enhanced persistence with correlation ID tracking
+                from ..agents.agent_matplot_enhanced import _persist_plot_ref_enhanced
+                
+                chart_metadata = {
+                    "data_type": data_type,
+                    "correlation_id": corr_id,
+                    "chart_type": chart_instruction.split("chart_type:")[1].split()[0] if "chart_type:" in chart_instruction else "unknown",
+                    "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "concurrent_generation": True
+                }
+                
+                chart_path = _persist_plot_ref_enhanced(
+                    data_type=data_type, 
+                    path=returned_path,
+                    correlation_id=corr_id,
+                    chart_metadata=chart_metadata
+                )
+                
                 chart_result["chart_path"] = chart_path
                 if chart_path:
-                    logger.info(f"[{corr_id}] Chart saved for {data_type}: {chart_path}")
+                    logger.info(f"[{corr_id}] Chart saved with tracking for {data_type}: {os.path.basename(chart_path)}")
                 else:
                     chart_result["errors"].append("Failed to persist chart file")
             else:
@@ -191,17 +225,62 @@ async def generate_single_chart(
         return data_type, chart_result
 
 def _build_chart_instruction(data_type: str, structured_data: dict, paragraph: str) -> str:
-    """Build chart instruction string for MatPlot tool."""
-    data_json = json.dumps(structured_data, ensure_ascii=False)
+    """Build chart instruction string for MatPlot tool using dynamic prompt generation."""
     
-    instruction = f"""Create a clean, publication-quality Matplotlib chart from the data below. 
-Do NOT call plt.show(). Save the figure exactly as 'chart_output.png' at 300 DPI. 
-Use readable axis labels; include a legend if multiple series exist.
+    # Dynamic chart type detection - same logic as original sequential version
+    chart_type = "bar"  # Default
+    if "AOV" in data_type or "Average Order Value" in data_type:
+        chart_type = "line"
+    elif "user type" in data_type.lower() or "product type" in data_type.lower():
+        chart_type = "stacked_bar"
+    elif "demographic" in data_type.lower() or "percentage" in data_type.lower():
+        chart_type = "pie"
+    elif "user type" in data_type.lower():
+        chart_type = "stacked_bar"
 
-Title: {data_type}
-Data (JSON): {data_json}
-
-Notes: {paragraph}"""
+    # Chart-specific labeling instructions - same as original
+    labeling_instructions = {
+        "bar": (
+            MONTHLY_SALES_PROMPT
+        ),
+        "stacked_bar": (
+            "- Label each stack segment with its value\n"
+            "- Place labels inside segments if height > 5% of total\n"
+            "- Use white text on dark colors, black on light colors\n"
+            "- Show both absolute values and percentages if space permits"
+        ),
+        "line": (
+            "- Annotate key data points (first, last, min, max)\n"
+            "- Use markers on the line for each data point\n"
+            "- Add value labels with slight offset to avoid line overlap\n"
+            "- Include trend indicators (arrows) for significant changes"
+        ),
+        "pie": (
+            "- Show percentage and absolute value: '52% (€123K)'\n"
+            "- Use autopct='%1.1f%%' for percentages\n"
+            "- Add a legend with full category names if labels are truncated\n"
+            "- Explode small slices (<5%) for visibility"
+        )
+    }
+    
+    # Build sophisticated instruction using the same logic as sequential version
+    instruction = STRUCTURED_CHART_SCHEMA_PROMPT.format(
+        alfred_data_description=paragraph,
+        data=structured_data
+    ) + (
+        "Create a clean, publication-quality Matplotlib chart from the data below.\n"
+        "Do NOT call plt.show(). Save the figure exactly as 'chart_output.png' at 300 DPI.\n"
+        "Use readable axis labels; include a legend if multiple series exist.\n\n"
+        f"CHART TYPE: {chart_type}\n"
+        "DATA LABELING REQUIREMENTS:\n"
+        f"{labeling_instructions.get(chart_type, labeling_instructions['bar'])}\n\n"
+        "General formatting:\n"
+        "- Ensure sufficient padding for labels\n"
+        "- Add gridlines for better readability (alpha=0.3)\n\n"
+        f"Title: {data_type}\n"
+        f"Data (JSON):\n{json.dumps(structured_data, ensure_ascii=False)}\n\n"
+        f"Notes: {paragraph or ''}"
+    )
     
     return instruction
 
@@ -218,7 +297,8 @@ async def mcp_matplot_run_concurrent(
     model_type: str = "gpt-4o",
     max_steps: int = 15,
     verbose: bool = False,  # Forced to False for concurrent version
-    transport: str = "http"
+    transport: str = "http",
+    debug_folder: str = None  # New parameter for debug folder
 ) -> Dict[str, Any]:
     """
     Concurrent version of mcp_matplot_run with parallel chart generation.
@@ -228,10 +308,12 @@ async def mcp_matplot_run_concurrent(
     - Uses resource pooling for MCP clients
     - Implements safe file naming to avoid collisions
     - Provides better error isolation between chart generations
+    - Supports debug folder configuration for chart output
     
     Args:
         results_dict: Dictionary with data for chart generation
         max_concurrent_charts: Maximum concurrent chart generations (default: 4)
+        debug_folder: Optional folder name for saving charts (for debugging)
         Other args: Same as original mcp_matplot_run
     
     Returns:
@@ -252,7 +334,11 @@ async def mcp_matplot_run_concurrent(
     )
     
     concurrency_manager.start_timing()
-    logger.info(f"[{correlation_id}] Starting concurrent chart generation for {len(results_dict)} charts")
+    
+    if debug_folder:
+        logger.info(f"[{correlation_id}] Starting concurrent chart generation for {len(results_dict)} charts -> debug folder: {debug_folder}")
+    else:
+        logger.info(f"[{correlation_id}] Starting concurrent chart generation for {len(results_dict)} charts")
     
     # Setup shared resources
     llm = llm or ChatOpenAI(model=model_type)
@@ -317,7 +403,7 @@ async def mcp_matplot_run_concurrent(
             task_corr_id = f"{correlation_id}_chart_{len(chart_tasks)}"
             task = concurrency_manager.execute_with_retry(
                 generate_single_chart,
-                data_type, entry, client_factory, llm, operation, max_steps, task_corr_id,
+                data_type, entry, client_factory, llm, operation, max_steps, task_corr_id, debug_folder,
                 operation_name=f"chart_{data_type}"
             )
             chart_tasks.append(task)

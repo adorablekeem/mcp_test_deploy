@@ -1,6 +1,37 @@
-{
+"{
     'structured_data': {
-        'AOV': 26.31
+        'AOV_by_month': [
+            {'year': 2023, 'month': 1, 'AOV': 55.04},
+            {'year': 2023, 'month': 2, 'AOV': 66.91},
+            {'year': 2023, 'month': 3, 'AOV': 66.96},
+            {'year': 2023, 'month': 4, 'AOV': 103.56},
+            {'year': 2023, 'month': 5, 'AOV': 68.82},
+            {'year': 2023, 'month': 6, 'AOV': 62.09},
+            {'year': 2023, 'month': 7, 'AOV': 58.50},
+            {'year': 2023, 'month': 8, 'AOV': 66.14},
+            {'year': 2023, 'month': 9, 'AOV': 68.34},
+            {'year': 2023, 'month': 10, 'AOV': 56.19},
+            {'year': 2023, 'month': 11, 'AOV': 67.10},
+            {'year': 2023, 'month': 12, 'AOV': 77.30},
+            {'year': 2024, 'month': 1, 'AOV': 60.52},
+            {'year': 2024, 'month': 2, 'AOV': 66.11},
+            {'year': 2024, 'month': 3, 'AOV': 60.42},
+            {'year': 2024, 'month': 4, 'AOV': 60.20},
+            {'year': 2024, 'month': 5, 'AOV': 60.99},
+            {'year': 2024, 'month': 6, 'AOV': 58.36},
+            {'year': 2024, 'month': 7, 'AOV': 84.75},
+            {'year': 2024, 'month': 8, 'AOV': 75.79},
+            {'year': 2024, 'month': 9, 'AOV': 78.76},
+            {'year': 2024, 'month': 10, 'AOV': 66.17},
+            {'year': 2024, 'month': 11, 'AOV': 92.67},
+            {'year': 2024, 'month': 12, 'AOV': 77.35},
+            {'year': 2025, 'month': 1, 'AOV': 87.60},
+            {'year': 2025, 'month': 2, 'AOV': 78.76},
+            {'year': 2025, 'month': 3, 'AOV': 84.72},
+            {'year': 2025, 'month': 4, 'AOV': 60.28},
+            {'year': 2025, 'month': 5, 'AOV': 84.89},
+            {'year': 2025, 'month': 6, 'AOV': 63.00}
+        ]
     },
-    'paragraph': 'The Average Order Value (AOV) for the merchant "2L8082NCG" from January 1, 2023, to June 30, 2025, is approximately 26.31. Observing this metric over the designated time period, it is essential to evaluate if the AOV trends upwards or downwards, indicating either enhanced customer engagement or a potential decrease in purchase size. Regular monitoring of such metrics can guide strategic adjustments in marketing or product offerings to maintain or enhance revenue streams.'
-}
+    'paragraph': 'The average order value (AOV) for the merchant \"2L8082NCG\" shows fluctuations from January 2023 to June 2025. Initially, in 2023, the AOV varied significantly, with a noticeable peak in April 2023 at $103.56. In 2024, the AOV remained relatively stable without drastic changes, with a slight increase starting mid-year. In 2025, the AOV began high in January at $87.60, followed by fluctuations across the months, indicating seasonal variations or changes in consumer purchasing behavior. The data shows a growing trend from a low AOV in mid-2023 with incremental increases and fluctuations likely correlating with market factors impacting consumer spending.'
+}"

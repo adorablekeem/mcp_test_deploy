@@ -1,8 +1,11 @@
 {
     'structured_data': {
-        'order_counts': {
-            'pay-in-3': 1080
-        }
+        'orders_by_product_type': [
+            {
+                'order_product': 'pay-in-3',
+                'total_orders': 1487
+            }
+        ]
     },
-    'paragraph': 'From the data collected for the merchant 2L8082NCG between 2023-01-01 and 2025-06-30, the pay-in-3 product type was utilized a total of 1,080 times. This indicates that the pay-in-3 option is quite popular among customers, possibly due to the manageable installment structure it offers. The consistent utilization of this product type may suggest a consumer preference towards shorter-term installment plans, which merchants might consider focusing on to optimize sales strategies and enhance customer satisfaction.'
+    'paragraph': 'The data shows that during the period from 2023-01-01 to 2025-06-30, the predominant product type used in orders for the merchant with ID "2L8082NCG" was "pay-in-3". With a total of 1487 orders, this reflects a significant preference among customers for spreading payments over three installments. This trend indicates a strong consumer confidence in utilizing flexible payment options, possibly driven by financial planning needs or convenience.'
 }

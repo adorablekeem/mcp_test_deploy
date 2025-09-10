@@ -213,13 +213,15 @@ class SlugMapper:
         }
     
     def _get_fallback_placeholders(self) -> List[str]:
-        """Fallback placeholders based on actual template analysis."""
+        """Fallback placeholders based on actual template analysis (only existing tokens)."""
         placeholders = []
         for slug in self._get_fallback_template_slugs():
+            # Only include tokens that actually exist in the template
+            # Based on slug validation logs, the template has title and chart tokens, but NO paragraph tokens
             placeholders.extend([
                 "{{" + f"{slug}_title" + "}}",
-                "{{" + f"{slug}_paragraph" + "}}",
                 "{{" + f"{slug}_chart" + "}}"
+                # Note: Deliberately excluding _paragraph tokens as they don't exist in template
             ])
         return placeholders
     
@@ -267,37 +269,50 @@ class SlugMapper:
             slug = self.get_slug(data_key)
             is_valid = slug in self.template_slugs
             
-            tokens = {
+            # Define required tokens (paragraph tokens don't exist in template)
+            required_tokens = {
                 "title": "{{" + f"{slug}_title" + "}}",
-                "paragraph": "{{" + f"{slug}_paragraph" + "}}",
                 "chart": "{{" + f"{slug}_chart" + "}}"
             }
+            
+            # Optional tokens that may or may not exist
+            optional_tokens = {
+                "paragraph": "{{" + f"{slug}_paragraph" + "}}"
+            }
+            
+            all_tokens = {**required_tokens, **optional_tokens}
             
             # Check if tokens exist in template
             token_matches = {
                 token_type: token in self.template_placeholders 
-                for token_type, token in tokens.items()
+                for token_type, token in all_tokens.items()
             }
             
-            all_tokens_match = all(token_matches.values())
+            # Only require REQUIRED tokens to match (not paragraph)
+            required_tokens_match = all(
+                token_matches[token_type] 
+                for token_type in required_tokens.keys()
+            )
             
             report["validation_results"][data_key] = {
                 "slug": slug,
                 "template_match": is_valid,
-                "tokens": tokens,
+                "tokens": all_tokens,
                 "token_matches": token_matches,
-                "all_tokens_valid": all_tokens_match
+                "required_tokens_valid": required_tokens_match,
+                "all_tokens_valid": all(token_matches.values())  # Keep for compatibility
             }
             
-            if all_tokens_match:
+            if required_tokens_match:
                 successful_mappings += 1
             else:
-                missing_tokens = [token_type for token_type, matches in token_matches.items() if not matches]
+                missing_required = [token_type for token_type in required_tokens.keys() 
+                                 if not token_matches[token_type]]
                 report["issues_found"].append({
                     "data_key": data_key,
                     "generated_slug": slug,
-                    "issue": f"Missing template tokens: {missing_tokens}",
-                    "tokens": tokens
+                    "issue": f"Missing required template tokens: {missing_required}",
+                    "tokens": all_tokens
                 })
         
         report["success_rate"] = successful_mappings / len(data_keys) if data_keys else 0
@@ -311,6 +326,12 @@ class SlugMapper:
                 logger.warning(f"    - {issue['data_key']}: {issue['issue']}")
         
         return report
+    
+    def has_token(self, token: str) -> bool:
+        """Check if a specific token exists in the template placeholders."""
+        if not self.template_placeholders:
+            return False
+        return token in self.template_placeholders
 
 
 def debug_slug_mapping(results_dict: Dict[str, Any], template_id: str) -> Dict[str, Any]:

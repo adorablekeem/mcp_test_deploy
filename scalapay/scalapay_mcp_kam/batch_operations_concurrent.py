@@ -14,8 +14,21 @@ from scalapay.scalapay_mcp_kam.utils.concurrency_utils import (
     log_concurrent_operation, create_correlation_id
 )
 from scalapay.scalapay_mcp_kam.utils.concurrency_config import get_concurrency_config
+from scalapay.scalapay_mcp_kam.utils.google_connection_manager import (
+    connection_manager, presentation_locks, circuit_breaker
+)
 
 logger = logging.getLogger(__name__)
+
+# Emergency configuration flags
+EMERGENCY_DISABLE_CONCURRENCY = True  # Set to False once SSL/segfault issues are resolved
+EMERGENCY_FALLBACK_ON_ERROR = True    # Always fallback to sequential on any error
+
+# Import emergency fallback functions
+from .batch_operations_emergency_fallback import (
+    safe_sequential_batch_text_replace, 
+    safe_sequential_batch_image_replace
+)
 
 @log_concurrent_operation("concurrent_batch_text_replace")
 async def concurrent_batch_text_replace(
@@ -23,8 +36,8 @@ async def concurrent_batch_text_replace(
     presentation_id: str,
     text_map: Dict[str, str],
     *,
-    max_concurrent_slides: int = 2,  # Reduced from 3 to 2
-    batch_size: int = 3,  # Reduced from 5 to 3
+    max_concurrent_slides: int = 1,  # EMERGENCY: Reduced to 1 to prevent SSL/segfault issues
+    batch_size: int = 2,  # EMERGENCY: Reduced to 2 to prevent API conflicts
     correlation_id: str = None
 ) -> Dict[str, Any]:
     """
@@ -46,6 +59,13 @@ async def concurrent_batch_text_replace(
     """
     corr_id = correlation_id or create_correlation_id()
     
+    # EMERGENCY MODE: Use safe sequential fallback
+    if EMERGENCY_DISABLE_CONCURRENCY:
+        logger.warning(f"[{corr_id}] EMERGENCY MODE: Using safe sequential fallback")
+        return await safe_sequential_batch_text_replace(
+            slides_service, presentation_id, text_map, corr_id
+        )
+    
     if not text_map:
         logger.info(f"[{corr_id}] No text replacements to process")
         return {"replacements_processed": 0, "slides_processed": 0, "api_calls": 0}
@@ -53,11 +73,12 @@ async def concurrent_batch_text_replace(
     start_time = time.time()
     
     try:
-        # Get all slides in the presentation
+        # Get all slides in the presentation using connection manager
         logger.debug(f"[{corr_id}] Fetching presentation structure...")
+        service = await connection_manager.get_service()
         presentation = await asyncio.get_event_loop().run_in_executor(
             None, 
-            lambda: slides_service.presentations().get(presentationId=presentation_id).execute()
+            lambda: service.presentations().get(presentationId=presentation_id).execute()
         )
         
         slides = presentation.get("slides", [])
@@ -81,11 +102,24 @@ async def concurrent_batch_text_replace(
             
             slide_tasks.append(process_slide_text_with_delay)
         
-        # Execute slide processing with concurrency limit
-        logger.debug(f"[{corr_id}] Starting concurrent processing of {len(slide_tasks)} slides")
-        slide_results = await gather_with_concurrency_limit(
-            slide_tasks, max_concurrent=max_concurrent_slides, return_exceptions=True
-        )
+        # Execute slide processing with circuit breaker protection
+        logger.debug(f"[{corr_id}] Starting protected processing of {len(slide_tasks)} slides")
+        
+        try:
+            slide_results = await circuit_breaker.call_with_circuit_breaker(
+                gather_with_concurrency_limit,
+                slide_tasks, max_concurrent=max_concurrent_slides, return_exceptions=True
+            )
+        except Exception as e:
+            logger.error(f"[{corr_id}] Circuit breaker activated, falling back to sequential: {e}")
+            # Fallback to sequential processing
+            slide_results = []
+            for task in slide_tasks:
+                try:
+                    result = await task()
+                    slide_results.append(result)
+                except Exception as task_e:
+                    slide_results.append(task_e)
         
         # Aggregate results
         total_replacements = 0
@@ -145,91 +179,102 @@ async def process_single_slide_text_concurrent(
     text_map: Dict[str, str],
     batch_size: int = 3,
     correlation_id: str = None,
-    max_retries: int = 2
+    max_retries: int = 1  # EMERGENCY: Reduced retries to prevent buildup
 ) -> Dict[str, Any]:
     """Process text replacements for a single slide with batching and retry logic."""
     corr_id = correlation_id or create_correlation_id()
     
-    # Retry logic with exponential backoff
-    for retry_attempt in range(max_retries + 1):
-        try:
-            if retry_attempt > 0:
-                # Exponential backoff: 1s, 2s, 4s
-                delay = 2 ** (retry_attempt - 1)
-                logger.info(f"[{corr_id}] Retrying slide text processing, attempt {retry_attempt + 1} after {delay}s delay")
-                await asyncio.sleep(delay)
-            
-            # Build requests for this specific slide
-            requests = []
-            for token, replacement_text in text_map.items():
-                requests.append({
-                    "replaceAllText": {
-                        "containsText": {"text": token, "matchCase": False},
-                        "replaceText": replacement_text,
-                        "pageObjectIds": [slide_id]  # Limit to this specific slide
-                    }
-                })
-            
-            if not requests:
-                return {"success": True, "replacements_made": 0, "api_calls": 0}
-            
-            # Process requests in smaller batches to respect API limits
-            api_calls = 0
-            total_replacements = 0
-            
-            # Split requests into even smaller batches for reliability
-            for i in range(0, len(requests), batch_size):
-                batch_requests = requests[i:i + batch_size]
+    # Use presentation lock to prevent race conditions
+    async with await presentation_locks.acquire_lock(presentation_id):
+        # Retry logic with linear backoff (not exponential to prevent buildup)
+        for retry_attempt in range(max_retries + 1):
+            try:
+                if retry_attempt > 0:
+                    # Linear backoff: 1s, 2s (not exponential)
+                    delay = retry_attempt * 1.0
+                    logger.info(f"[{corr_id}] Retrying slide text processing, attempt {retry_attempt + 1} after {delay}s delay")
+                    await asyncio.sleep(delay)
                 
-                # Add small delay between batches within same slide
-                if i > 0:
-                    await asyncio.sleep(0.2)  # 200ms between batches
+                # Build requests for this specific slide
+                requests = []
+                for token, replacement_text in text_map.items():
+                    requests.append({
+                        "replaceAllText": {
+                            "containsText": {"text": token, "matchCase": False},
+                            "replaceText": replacement_text,
+                            "pageObjectIds": [slide_id]  # Limit to this specific slide
+                        }
+                    })
                 
-                # Execute batch update with timeout
-                await asyncio.wait_for(
-                    asyncio.get_event_loop().run_in_executor(
-                        None,
-                        lambda: slides_service.presentations().batchUpdate(
-                            presentationId=presentation_id,
-                            body={"requests": batch_requests}
-                        ).execute()
-                    ),
-                    timeout=30.0  # 30 second timeout
-                )
+                if not requests:
+                    return {"success": True, "replacements_made": 0, "api_calls": 0}
                 
-                api_calls += 1
-                total_replacements += len(batch_requests)
-                logger.debug(f"[{corr_id}] Processed batch {i//batch_size + 1} with {len(batch_requests)} replacements")
-            
-            return {
-                "success": True,
-                "replacements_made": total_replacements,
-                "api_calls": api_calls,
-                "correlation_id": corr_id,
-                "retry_attempts": retry_attempt
-            }
-            
-        except Exception as e:
-            error_msg = str(e)
-            
-            # Don't retry on certain permanent errors
-            if any(permanent_error in error_msg.lower() for permanent_error in [
-                "invalid request", "permission denied", "not found", "quota exceeded"
-            ]):
-                logger.error(f"[{corr_id}] Permanent error, not retrying: {error_msg}")
-                break
-            
-            if retry_attempt < max_retries:
-                logger.warning(f"[{corr_id}] Attempt {retry_attempt + 1} failed: {error_msg}")
-            else:
-                logger.error(f"[{corr_id}] All {max_retries + 1} attempts failed: {error_msg}")
-    
-    return {
-        "success": False,
-        "error": error_msg,
-        "correlation_id": corr_id,
-        "retry_attempts": max_retries
-    }
+                # Process requests in smaller batches to respect API limits
+                api_calls = 0
+                total_replacements = 0
+                
+                # Split requests into even smaller batches for reliability
+                for i in range(0, len(requests), batch_size):
+                    batch_requests = requests[i:i + batch_size]
+                    
+                    # Add small delay between batches within same slide
+                    if i > 0:
+                        await asyncio.sleep(0.2)  # 200ms between batches
+                    
+                    # Execute batch update with connection manager and timeout
+                    service = await connection_manager.get_service()
+                    await asyncio.wait_for(
+                        asyncio.get_event_loop().run_in_executor(
+                            None,
+                            lambda: service.presentations().batchUpdate(
+                                presentationId=presentation_id,
+                                body={"requests": batch_requests}
+                            ).execute()
+                        ),
+                        timeout=15.0  # Reduced timeout to 15 seconds
+                    )
+                    
+                    api_calls += 1
+                    total_replacements += len(batch_requests)
+                    logger.debug(f"[{corr_id}] Processed batch {i//batch_size + 1} with {len(batch_requests)} replacements")
+                
+                # Success case - return from inside try block
+                return {
+                    "success": True,
+                    "replacements_made": total_replacements,
+                    "api_calls": api_calls,
+                    "correlation_id": corr_id,
+                    "retry_attempts": retry_attempt
+                }
+                
+            except Exception as e:
+                error_msg = str(e)
+                
+                # Don't retry on certain permanent errors or critical system errors
+                if any(permanent_error in error_msg.lower() for permanent_error in [
+                    "invalid request", "permission denied", "not found", "quota exceeded",
+                    "ssl", "segmentation", "memory error", "connection reset"
+                ]):
+                    logger.error(f"[{corr_id}] Permanent error, not retrying: {error_msg}")
+                    
+                    # Reset connection manager on SSL/connection errors
+                    if any(conn_error in error_msg.lower() for conn_error in ["ssl", "connection"]):
+                        logger.warning(f"[{corr_id}] Resetting connection manager due to connection error")
+                        await connection_manager.reset_connection()
+                    
+                    break
+                
+                if retry_attempt < max_retries:
+                    logger.warning(f"[{corr_id}] Attempt {retry_attempt + 1} failed: {error_msg}")
+                else:
+                    logger.error(f"[{corr_id}] All {max_retries + 1} attempts failed: {error_msg}")
+        
+        return {
+            "success": False,
+            "error": error_msg,
+            "correlation_id": corr_id,
+            "retry_attempts": max_retries
+        }
 
 @log_concurrent_operation("concurrent_batch_image_replace")
 async def concurrent_batch_replace_shapes_with_images_and_resize(

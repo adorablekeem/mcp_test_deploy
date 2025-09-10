@@ -518,6 +518,9 @@ async def create_slides(merchant_token: str, starting_date: str, end_date: str, 
     print(f"\n[DEBUG] Raw Results: {results}")
 
 
+    # Configure debug folder for chart output (if specified)
+    debug_folder = os.getenv("SCALAPAY_CHART_DEBUG_FOLDER")
+    
     charts_list = await mcp_matplot_run_with_fallback(
     results,  # This is the results_dict parameter (positional)
     matplot_url="http://localhost:8010/mcp",
@@ -528,7 +531,8 @@ async def create_slides(merchant_token: str, starting_date: str, end_date: str, 
     max_concurrent_charts=concurrency_config.max_concurrent_charts,
     max_steps=concurrency_config.chart_generation_max_steps,
     verbose=True,  # Force enable for debugging
-    transport="http"
+    transport="http",
+    debug_folder=debug_folder  # Pass debug folder configuration
 )
 
     print(f"\n[DEBUG] Charts List is: {charts_list}")

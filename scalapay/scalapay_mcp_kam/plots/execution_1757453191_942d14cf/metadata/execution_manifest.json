@@ -1,0 +1,50 @@
+{
+  "execution_id": "1757453191_942d14cf",
+  "created_at": "2025-09-09T23:26:31.020305",
+  "base_folder": "plots",
+  "charts_folder": "plots/execution_1757453191_942d14cf/charts",
+  "enable_execution_folders": true,
+  "charts": [
+    {
+      "data_type": "monthly sales year over year",
+      "chart_path": "plots/execution_1757453191_942d14cf/charts/monthly_sales_year_over_year_1757453191_17574531.png",
+      "filename": "monthly_sales_year_over_year_1757453191_17574531.png",
+      "registered_at": "2025-09-09T23:26:31.020537",
+      "correlation_id": "1757453191_942d14cf",
+      "file_size": null,
+      "metadata": {
+        "chart_type": "bar",
+        "demo": true
+      }
+    },
+    {
+      "data_type": "AOV by product type",
+      "chart_path": "plots/execution_1757453191_942d14cf/charts/AOV_by_product_type_1757453191_17574531.png",
+      "filename": "AOV_by_product_type_1757453191_17574531.png",
+      "registered_at": "2025-09-09T23:26:31.020742",
+      "correlation_id": "1757453191_942d14cf",
+      "file_size": null,
+      "metadata": {
+        "chart_type": "line",
+        "demo": true
+      }
+    },
+    {
+      "data_type": "user demographics",
+      "chart_path": "plots/execution_1757453191_942d14cf/charts/user_demographics_1757453191_17574531.png",
+      "filename": "user_demographics_1757453191_17574531.png",
+      "registered_at": "2025-09-09T23:26:31.020872",
+      "correlation_id": "1757453191_942d14cf",
+      "file_size": null,
+      "metadata": {
+        "chart_type": "pie",
+        "demo": true
+      }
+    }
+  ],
+  "total_charts": 3,
+  "status": "completed",
+  "last_updated": "2025-09-09T23:26:31.020905",
+  "completed_at": "2025-09-09T23:26:31.021017",
+  "final_chart_count": 3
+}

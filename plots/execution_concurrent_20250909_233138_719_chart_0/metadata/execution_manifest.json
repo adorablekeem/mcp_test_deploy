@@ -1,0 +1,27 @@
+{
+  "execution_id": "concurrent_20250909_233138_719_chart_0",
+  "created_at": "2025-09-09T23:32:25.460450",
+  "base_folder": "plots",
+  "charts_folder": "plots/execution_concurrent_20250909_233138_719_chart_0/charts",
+  "enable_execution_folders": true,
+  "charts": [
+    {
+      "data_type": "monthly sales year over year",
+      "chart_path": "plots/execution_concurrent_20250909_233138_719_chart_0/charts/monthly_sales_year_over_year_1757453545_concurre.png",
+      "filename": "monthly_sales_year_over_year_1757453545_concurre.png",
+      "registered_at": "2025-09-09T23:32:25.461055",
+      "correlation_id": "concurrent_20250909_233138_719_chart_0",
+      "file_size": 196804,
+      "metadata": {
+        "data_type": "monthly sales year over year",
+        "correlation_id": "concurrent_20250909_233138_719_chart_0",
+        "chart_type": "unknown",
+        "generated_at": "2025-09-09 23:32:25",
+        "concurrent_generation": true
+      }
+    }
+  ],
+  "total_charts": 1,
+  "status": "active",
+  "last_updated": "2025-09-09T23:32:25.461107"
+}

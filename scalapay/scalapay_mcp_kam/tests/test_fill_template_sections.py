@@ -264,7 +264,13 @@ async def build_text_and_image_maps_enhanced(
                     slug = _slug(title)
                     
                 text_map["{{" + f"{slug}_title" + "}}"] = title
-                text_map["{{" + f"{slug}_paragraph" + "}}"] = optimized_content.slide_paragraph
+                
+                # Only add paragraph token if it exists in template
+                paragraph_token = "{{" + f"{slug}_paragraph" + "}}"
+                if slug_mapper and slug_mapper.has_token(paragraph_token):
+                    text_map[paragraph_token] = optimized_content.slide_paragraph
+                elif not slug_mapper:  # Fallback for when no template validation
+                    text_map[paragraph_token] = optimized_content.slide_paragraph
                 
                 # Create comprehensive notes content
                 notes_content = f"Full Analysis:\n{optimized_content.full_paragraph}"
@@ -293,8 +299,15 @@ async def build_text_and_image_maps_enhanced(
                 else:
                     slug = _slug(title)
                     
-                text_map["{{{" + f"{slug}_title" + "}}}"] = title
-                text_map["{{{" + f"{slug}_paragraph" + "}}}"] = str(full_paragraph)
+                text_map["{{" + f"{slug}_title" + "}}"] = title
+                
+                # Only add paragraph token if it exists in template
+                paragraph_token = "{{" + f"{slug}_paragraph" + "}}"
+                if slug_mapper and slug_mapper.has_token(paragraph_token):
+                    text_map[paragraph_token] = str(full_paragraph)
+                elif not slug_mapper:  # Fallback for when no template validation
+                    text_map[paragraph_token] = str(full_paragraph)
+                    
                 notes_map["{{" + f"{slug}_notes" + "}}"] = f"Full Analysis:\n{full_paragraph}"
                 
                 sections.append({

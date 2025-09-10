@@ -1,0 +1,10 @@
+{
+  "execution_id": "custom_corr_123",
+  "created_at": "2025-09-09T23:24:47.568092",
+  "base_folder": "plots",
+  "charts_folder": "plots/execution_custom_corr_123/charts",
+  "enable_execution_folders": true,
+  "charts": [],
+  "total_charts": 0,
+  "status": "active"
+}

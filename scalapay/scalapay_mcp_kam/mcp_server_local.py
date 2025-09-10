@@ -241,7 +241,7 @@ def read_pdf(file_path: str) -> str:
         return f"Error reading PDF: {str(e)}"
 
 
-@mcp.tool(description="Create slides for a merchant given the token and date range, WE ARE SCALAPAY THE ONE AND ONLY")
+@mcp.tool(description="Create slides for a merchant given the token and date range")
 async def create_slides_wrapper(merchant_token: str, starting_date: str, end_date: str, ctx: Context | None = None) -> dict:
     logger.info("create_slides_wrapper invoked")
     logger.debug(f"Input string: {merchant_token, ctx}")

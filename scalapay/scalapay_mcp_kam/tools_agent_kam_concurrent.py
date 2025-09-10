@@ -236,24 +236,30 @@ async def fill_template_for_all_sections_new_enhanced_concurrent(
         logger.info(f"[{correlation_id}] Phase 4: Starting concurrent text replacement for {len(text_map)} tokens...")
         make_all_shapes_normal_weight(presentation_id)
         
-        # Use concurrent batch text replacement
-        from scalapay.scalapay_mcp_kam.batch_operations_concurrent import concurrent_batch_text_replace_with_fallback
-        text_result = await concurrent_batch_text_replace_with_fallback(
-            slides, presentation_id, text_map, 
-            enable_concurrent=config.enable_concurrent_batch_operations
+        # Use enhanced batch text replacement with chart-specific styling
+        from scalapay.scalapay_mcp_kam.batch_operations_styled_wrapper import enhanced_batch_text_replace_with_styling
+        text_result = await enhanced_batch_text_replace_with_styling(
+            slides, presentation_id, text_map,
+            results=results,  # Pass Alfred results for styling context
+            enable_styling=config.enable_concurrent_batch_operations,  # Use same config for styling
+            enable_concurrent=config.enable_concurrent_batch_operations,
+            correlation_id=f"{correlation_id}_text"
         )
         logger.info(f"[{correlation_id}] Text replacement complete: {text_result.get('replacements_processed', 0)} replacements")
         
         # Phase 5: CONCURRENT Image replacement (slide-level parallelism)
         logger.info(f"[{correlation_id}] Phase 5: Starting concurrent image replacement for {len(image_map)} tokens...")
         
-        # Use concurrent batch image replacement
-        from scalapay.scalapay_mcp_kam.batch_operations_concurrent import concurrent_batch_replace_shapes_with_images_and_resize_with_fallback
-        image_result = await concurrent_batch_replace_shapes_with_images_and_resize_with_fallback(
+        # Use enhanced batch image replacement with chart-specific styling  
+        from scalapay.scalapay_mcp_kam.batch_operations_styled_wrapper import enhanced_batch_image_replace_with_styling
+        image_result = await enhanced_batch_image_replace_with_styling(
             slides, presentation_id, image_map,
-            resize={"mode": "ABSOLUTE", "scaleX": 120, "scaleY": 120, "unit": "PT", "translateX": 130, "translateY": 250},
+            results=results,  # Pass Alfred results for styling context
+            # No static resize parameter - let chart-specific styling handle positioning
             replace_method="CENTER_INSIDE",
-            enable_concurrent=config.enable_concurrent_batch_operations
+            enable_styling=config.enable_concurrent_batch_operations,  # Use same config for styling
+            enable_concurrent=config.enable_concurrent_batch_operations,
+            correlation_id=f"{correlation_id}_image"
         )
         logger.info(f"[{correlation_id}] Image replacement complete: {image_result.get('replacements_processed', 0)} replacements")
 
@@ -301,9 +307,15 @@ async def fill_template_for_all_sections_new_enhanced_concurrent(
             "processing_time": concurrency_manager.metrics.total_processing_time,
             "concurrent_operations": concurrency_manager.metrics.concurrent_operations_count,
             "speaker_notes_errors": notes_result.get("errors", []),
-            # Batch operation results
+            # Batch operation results with styling information
             "text_replacement_result": text_result,
-            "image_replacement_result": image_result
+            "image_replacement_result": image_result,
+            "chart_styling_enabled": text_result.get("processing_mode", "").startswith("styled"),
+            "total_styles_applied": text_result.get("styles_applied", 0) + image_result.get("styles_applied", 0),
+            "styling_mode": {
+                "text_processing_mode": text_result.get("processing_mode", "unknown"),
+                "image_processing_mode": image_result.get("processing_mode", "unknown")
+            }
         }
         
         logger.info(f"[{correlation_id}] Enhanced concurrent template processing complete in {concurrency_manager.metrics.total_processing_time:.2f}s")
