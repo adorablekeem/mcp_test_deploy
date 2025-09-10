@@ -237,7 +237,7 @@ async def fill_template_for_all_sections_new_enhanced_concurrent(
         make_all_shapes_normal_weight(presentation_id)
         
         # Use enhanced batch text replacement with chart-specific styling
-        from scalapay.scalapay_mcp_kam.batch_operations_styled_wrapper import enhanced_batch_text_replace_with_styling
+        from scalapay.scalapay_mcp_kam.concurrency_utils.batch_operations_styled_wrapper import enhanced_batch_text_replace_with_styling
         text_result = await enhanced_batch_text_replace_with_styling(
             slides, presentation_id, text_map,
             results=results,  # Pass Alfred results for styling context
@@ -251,7 +251,7 @@ async def fill_template_for_all_sections_new_enhanced_concurrent(
         logger.info(f"[{correlation_id}] Phase 5: Starting concurrent image replacement for {len(image_map)} tokens...")
         
         # Use enhanced batch image replacement with chart-specific styling  
-        from scalapay.scalapay_mcp_kam.batch_operations_styled_wrapper import enhanced_batch_image_replace_with_styling
+        from scalapay.scalapay_mcp_kam.concurrency_utils.batch_operations_styled_wrapper import enhanced_batch_image_replace_with_styling
         image_result = await enhanced_batch_image_replace_with_styling(
             slides, presentation_id, image_map,
             results=results,  # Pass Alfred results for styling context

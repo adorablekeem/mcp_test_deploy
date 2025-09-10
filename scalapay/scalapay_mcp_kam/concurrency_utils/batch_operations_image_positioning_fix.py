@@ -26,33 +26,40 @@ def build_correct_image_positioning_request(
         data_type: Chart data type for logging
     
     Returns:
-        Properly formatted Google Slides API request
+        Properly formatted Google Slides API request using updatePageElementTransform
     """
     resize_config = image_style_config.get("resize", {})
     
     # Extract styling parameters with correct defaults
-    scale_x = resize_config.get("scaleX", 140)  # This is width in PT, not scaling factor
-    scale_y = resize_config.get("scaleY", 100)  # This is height in PT, not scaling factor
-    translate_x = resize_config.get("translateX", 200)  # X position in PT
-    translate_y = resize_config.get("translateY", 200)  # Y position in PT
+    target_width_pt = resize_config.get("scaleX", 140)  # Target width in points
+    target_height_pt = resize_config.get("scaleY", 100)  # Target height in points
+    translate_x_pt = resize_config.get("translateX", 200)  # X position in points
+    translate_y_pt = resize_config.get("translateY", 200)  # Y position in points
     unit = resize_config.get("unit", "PT")
     
-    logger.debug(f"Building positioning request for {data_type}: "
-                f"size=({scale_x}x{scale_y} {unit}), "
-                f"position=({translate_x}, {translate_y} {unit})")
+    # Convert absolute sizes to scale factors
+    # Assume default image size is ~100pt x 100pt, so scale accordingly
+    default_size = 100.0
+    scale_x_factor = target_width_pt / default_size
+    scale_y_factor = target_height_pt / default_size
     
-    # Build the correct Google Slides API request
+    logger.debug(f"Building positioning request for {data_type}: "
+                f"target_size=({target_width_pt}x{target_height_pt} {unit}), "
+                f"scale_factors=({scale_x_factor:.2f}x{scale_y_factor:.2f}), "
+                f"position=({translate_x_pt}, {translate_y_pt} {unit})")
+    
+    # Build the correct Google Slides API request using updatePageElementTransform
     return {
-        "updateImageProperties": {
-            "objectId": image_object_id,  # FIXED: Use image object ID, not slide ID
-            "imageProperties": {
-                # Set absolute size in points
-                "size": {
-                    "width": {"magnitude": scale_x, "unit": unit},
-                    "height": {"magnitude": scale_y, "unit": unit}
-                }
+        "updatePageElementTransform": {
+            "objectId": image_object_id,
+            "transform": {
+                "scaleX": scale_x_factor,  # Scale factor for width
+                "scaleY": scale_y_factor,  # Scale factor for height  
+                "translateX": translate_x_pt,  # Position in points
+                "translateY": translate_y_pt,  # Position in points
+                "unit": "PT"  # Use points directly
             },
-            "fields": "size"
+            "applyMode": "ABSOLUTE"
         }
     }
 

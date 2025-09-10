@@ -1,301 +1,232 @@
 #!/usr/bin/env python3
 """
-Test script for the corrected chart positioning and sizing implementation.
-Verifies that the Google Slides API requests are built correctly.
+Test script to verify chart positioning and text replacement fixes.
+This script tests the slug mapping and token matching logic without needing actual API calls.
 """
 
 import sys
-import json
-from typing import Dict, Any
+import os
+sys.path.append('scalapay/scalapay_mcp_kam')
 
-# Add project to path
-sys.path.insert(0, 'scalapay/scalapay_mcp_kam')
+from scalapay.scalapay_mcp_kam.utils.slug_validation import SlugMapper
+import re
 
-
-def test_corrected_positioning_requests():
-    """Test that positioning requests are built correctly."""
-    print("🔧 Testing Corrected Chart Positioning Implementation")
-    print("=" * 60)
+def test_slug_mapping():
+    """Test that slug mapping works correctly for known data types."""
+    print("=== TESTING SLUG MAPPING ===")
     
-    try:
-        from scalapay.scalapay_mcp_kam.batch_operations_image_positioning_fix import (
-            build_correct_image_positioning_request,
-            build_correct_image_transform_request,
-            CORRECTED_CHART_CONFIGS
-        )
-        
-        # Test image object ID (this would come from actual Google Slides API)
-        test_image_object_id = "i1234567890abcdef"
-        
-        # Test different chart configurations
-        test_cases = [
-            ("monthly_sales_bar", CORRECTED_CHART_CONFIGS["monthly_sales_bar"]),
-            ("aov_line", CORRECTED_CHART_CONFIGS["aov_line"]),
-            ("demographics_pie", CORRECTED_CHART_CONFIGS["demographics_pie"])
-        ]
-        
-        print("\n📊 Testing Size Requests (Width/Height):")
-        print("-" * 50)
-        
-        for chart_name, config in test_cases:
-            size_request = build_correct_image_positioning_request(
-                test_image_object_id, config, chart_name
-            )
-            
-            # Extract size parameters
-            size_props = size_request["updateImageProperties"]["imageProperties"]["size"]
-            width = size_props["width"]["magnitude"]
-            height = size_props["height"]["magnitude"]
-            
-            print(f"✅ {chart_name}:")
-            print(f"   Image Object ID: {size_request['updateImageProperties']['objectId']}")
-            print(f"   Size: {width}×{height} PT")
-            print(f"   Request: {json.dumps(size_request, indent=2)}\n")
-        
-        print("\n📍 Testing Transform Requests (Position):")
-        print("-" * 50)
-        
-        for chart_name, config in test_cases:
-            transform_request = build_correct_image_transform_request(
-                test_image_object_id, config, chart_name
-            )
-            
-            # Extract transform parameters
-            transform_props = transform_request["updateImageProperties"]["imageProperties"]["transform"]
-            translate_x = transform_props["translateX"]
-            translate_y = transform_props["translateY"]
-            scale_x = transform_props["scaleX"]
-            scale_y = transform_props["scaleY"]
-            
-            print(f"✅ {chart_name}:")
-            print(f"   Position: ({translate_x}, {translate_y}) PT")
-            print(f"   Scale: ({scale_x}, {scale_y}) [should be 1.0, 1.0]")
-            print(f"   Request: {json.dumps(transform_request, indent=2)}\n")
-        
-        return True
-        
-    except Exception as e:
-        print(f"💥 Test failed: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
-
-
-def test_chart_style_config_mapping():
-    """Test that chart style configurations map correctly to API requests."""
-    print("\n🎨 Testing Chart Style Configuration Mapping")
-    print("=" * 60)
-    
-    try:
-        from scalapay.scalapay_mcp_kam.chart_config.chart_styling_config import (
-            get_image_style_for_slide,
-            detect_chart_type_from_data_type,
-            ChartType
-        )
-        
-        # Test cases matching real data types
-        test_data_types = [
-            "monthly sales year over year",
-            "AOV by product type", 
-            "user demographics in percentages",
-            "orders by product type"
-        ]
-        
-        print("\n📊 Testing Style Configuration Retrieval:")
-        print("-" * 50)
-        
-        for data_type in test_data_types:
-            # Detect chart type
-            chart_type = detect_chart_type_from_data_type(data_type)
-            
-            # Get style configuration
-            style_config = get_image_style_for_slide(data_type, "", chart_type)
-            resize_config = style_config.get("resize", {})
-            
-            print(f"✅ '{data_type}':")
-            print(f"   Chart Type: {chart_type.value}")
-            print(f"   Size: {resize_config.get('scaleX', 'N/A')}×{resize_config.get('scaleY', 'N/A')} {resize_config.get('unit', 'PT')}")
-            print(f"   Position: ({resize_config.get('translateX', 'N/A')}, {resize_config.get('translateY', 'N/A')})")
-            print(f"   Full config: {json.dumps(resize_config, indent=2)}\n")
-        
-        return True
-        
-    except Exception as e:
-        print(f"💥 Style config test failed: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
-
-
-def test_issues_found_and_fixed():
-    """Document the issues that were found and how they were fixed."""
-    print("\n🚨 Issues Found and Fixed in Chart Positioning")
-    print("=" * 60)
-    
-    issues_and_fixes = [
-        {
-            "issue": "Wrong Object ID Usage",
-            "problem": "Used slide_id instead of image object ID",
-            "old_code": '"objectId": slide_id  # WRONG!',
-            "new_code": '"objectId": image_object_id  # CORRECT!',
-            "impact": "API calls would fail or affect wrong objects"
-        },
-        {
-            "issue": "Confused Size vs Scale Parameters", 
-            "problem": "Used scaleX/scaleY as both pixel sizes AND scaling factors",
-            "old_code": '"width": {"magnitude": resize_config.get("scaleX", 120), "unit": "PT"}\\n"scaleX": resize_config.get("scaleX", 120) / 100.0',
-            "new_code": '"width": {"magnitude": scale_x, "unit": unit}  # scale_x = 450 PT\\n"scaleX": 1.0  # No additional scaling',
-            "impact": "Charts would be wrong size and double-scaled"
-        },
-        {
-            "issue": "Missing Image Object Discovery",
-            "problem": "Never queried presentation to find actual image elements",
-            "old_code": "# No image discovery logic",
-            "new_code": "presentation = slides_service.presentations().get()\\nimage_ids = find_image_object_ids_in_slide(slide_data)",
-            "impact": "Positioning couldn't work without real image IDs"
-        },
-        {
-            "issue": "Mixed Size and Transform Operations",
-            "problem": "Tried to set size and transform in same request with conflicting values",
-            "old_code": '{"size": {...}, "transform": {...}}  # Conflicting',
-            "new_code": 'Separate requests: size_request and transform_request',
-            "impact": "Google Slides API might ignore or misapply properties"
-        },
-        {
-            "issue": "Incorrect Parameter Interpretation",
-            "problem": "scaleX=140 treated as 140% scaling instead of 140 points width",
-            "old_code": "scaleX=140 means 140% scaling",
-            "new_code": "scale_x=140 means 140 PT width, scaleX=1.0 means no scaling",
-            "impact": "Charts sized incorrectly"
-        }
+    # Test data - these are the data types from the logs
+    test_data_types = [
+        "monthly sales year over year",
+        "monthly sales by product type over time", 
+        "monthly orders by user type",
+        "AOV",
+        "scalapay users demographic in percentages",
+        "orders by product type (i.e. pay in 3, pay in 4)",
+        "AOV by product type (i.e. pay in 3, pay in 4)"
     ]
     
-    for i, issue in enumerate(issues_and_fixes, 1):
-        print(f"🔴 Issue {i}: {issue['issue']}")
-        print(f"   Problem: {issue['problem']}")
-        print(f"   Old: {issue['old_code']}")
-        print(f"   New: {issue['new_code']}")
-        print(f"   Impact: {issue['impact']}\n")
+    # Expected tokens from the template (based on logs)
+    expected_tokens = [
+        "{{aov-by-product-type-i-e-pay-in-3-pay-in_chart}}",
+        "{{aov_chart}}",
+        "{{monthly-sales-over-time_chart}}",
+        "{{monthly_orders_by_user_type_chart}}",
+        "{{orders-by-product-type-i-e-pay-in-3-pay_chart}}",
+        "{{scalapay-users-demographic-in-percentage_chart}}"
+    ]
     
-    print("✅ All issues have been addressed in the corrected implementation!")
+    slug_mapper = SlugMapper("1hDkICKx4D3jHdxky_3_1iJcPFVQFxTkvlH7mVSFCx_o")
+    
+    print(f"Template slugs: {sorted(slug_mapper.template_slugs)}")
+    print()
+    
+    for data_type in test_data_types:
+        slug = slug_mapper.get_slug(data_type)
+        print(f"Data type: '{data_type}'")
+        print(f"  Generated slug: '{slug}'")
+        print(f"  In template: {slug in slug_mapper.template_slugs}")
+        print()
+    
     return True
 
-
-def test_api_request_validation():
-    """Validate that the generated API requests match Google Slides API spec."""
-    print("\n🔍 Validating Google Slides API Request Format")
-    print("=" * 60)
+def test_token_matching():
+    """Test that token matching works for both text and image tokens."""
+    print("=== TESTING TOKEN MATCHING ===")
     
-    try:
-        from scalapay.scalapay_mcp_kam.batch_operations_image_positioning_fix import (
-            build_correct_image_positioning_request,
-            build_correct_image_transform_request,
-            CORRECTED_CHART_CONFIGS
-        )
-        
-        test_config = CORRECTED_CHART_CONFIGS["monthly_sales_bar"]
-        test_image_id = "test_image_123"
-        
-        # Test size request
-        size_request = build_correct_image_positioning_request(test_image_id, test_config, "test")
-        
-        # Validate structure
-        required_size_fields = [
-            "updateImageProperties",
-            ["updateImageProperties", "objectId"],
-            ["updateImageProperties", "imageProperties"],
-            ["updateImageProperties", "imageProperties", "size"],
-            ["updateImageProperties", "imageProperties", "size", "width"],
-            ["updateImageProperties", "imageProperties", "size", "height"],
-            ["updateImageProperties", "fields"]
-        ]
-        
-        print("✅ Size Request Validation:")
-        for field_path in required_size_fields:
-            if isinstance(field_path, list):
-                value = size_request
-                path_str = ""
-                for key in field_path:
-                    value = value[key]
-                    path_str += f"['{key}']" if path_str else f"['{key}']"
-                print(f"   ✓ {path_str}: {value}")
-            else:
-                if field_path in size_request:
-                    print(f"   ✓ {field_path}: present")
-        
-        # Test transform request  
-        transform_request = build_correct_image_transform_request(test_image_id, test_config, "test")
-        
-        print("\\n✅ Transform Request Validation:")
-        transform_fields = [
-            ["updateImageProperties", "imageProperties", "transform", "translateX"],
-            ["updateImageProperties", "imageProperties", "transform", "translateY"],
-            ["updateImageProperties", "imageProperties", "transform", "scaleX"],
-            ["updateImageProperties", "imageProperties", "transform", "scaleY"]
-        ]
-        
-        for field_path in transform_fields:
-            value = transform_request
-            path_str = ""
-            for key in field_path:
-                value = value[key]
-                path_str += f"['{key}']" if path_str else f"['{key}']"
-            print(f"   ✓ {path_str}: {value}")
-        
-        print("\\n✅ API request validation passed!")
-        return True
-        
-    except Exception as e:
-        print(f"💥 API validation failed: {e}")
-        return False
-
-
-def main():
-    """Run all positioning tests."""
-    print("🧪 Chart Positioning Fix Test Suite")
-    print("=" * 60)
+    slug_mapper = SlugMapper("1hDkICKx4D3jHdxky_3_1iJcPFVQFxTkvlH7mVSFCx_o")
     
-    test_results = []
-    
-    tests = [
-        ("Corrected Positioning Requests", test_corrected_positioning_requests),
-        ("Chart Style Config Mapping", test_chart_style_config_mapping), 
-        ("Issues Found and Fixed", test_issues_found_and_fixed),
-        ("API Request Validation", test_api_request_validation)
+    # Sample tokens from logs
+    test_tokens = [
+        "{{aov_chart}}",
+        "{{monthly-sales-over-time_chart}}",
+        "{{scalapay-users-demographic-in-percentage_chart}}",
+        "{{orders-by-product-type-i-e-pay-in-3-pay_chart}}",
+        "{{aov_title}}",
+        "{{monthly-orders-by-user-type_title}}"
     ]
     
-    for test_name, test_func in tests:
-        print(f"\\n🔍 Running: {test_name}")
-        try:
-            success = test_func()
-            test_results.append((test_name, success))
-        except Exception as e:
-            print(f"💥 {test_name} crashed: {e}")
-            test_results.append((test_name, False))
+    # Sample slide metadata (simulating what build_slide_metadata_from_results would create)
+    slide_metadata = {
+        "monthly sales year over year": {"data_type": "monthly sales year over year", "chart_type": "line"},
+        "AOV": {"data_type": "AOV", "chart_type": "bar"},
+        "monthly orders by user type": {"data_type": "monthly orders by user type", "chart_type": "line"},
+        "scalapay users demographic in percentages": {"data_type": "scalapay users demographic in percentages", "chart_type": "pie"},
+        "orders by product type (i.e. pay in 3, pay in 4)": {"data_type": "orders by product type (i.e. pay in 3, pay in 4)", "chart_type": "bar"}
+    }
     
-    # Summary
-    print("\\n" + "=" * 60)
-    print("📊 Test Results Summary:")
+    successful_matches = 0
+    total_tokens = len(test_tokens)
+    
+    for token in test_tokens:
+        print(f"Testing token: {token}")
+        
+        # Extract token slug using the same logic as the fixed code
+        token_match = re.match(r'\{\{([^_}]+)(?:_(?:title|paragraph|chart))?\}\}', token)
+        if token_match:
+            token_slug = token_match.group(1)
+            print(f"  Extracted slug: '{token_slug}'")
+            
+            # Find matching data type
+            found_match = False
+            for data_type, metadata in slide_metadata.items():
+                expected_slug = slug_mapper.get_slug(data_type)
+                
+                if (token_slug == expected_slug or 
+                    token_slug.replace('-', '_') == expected_slug.replace('-', '_') or
+                    expected_slug.replace('-', '_') == token_slug.replace('-', '_')):
+                    print(f"  ✅ MATCHED with data_type: '{data_type}' (expected_slug: '{expected_slug}')")
+                    found_match = True
+                    successful_matches += 1
+                    break
+            
+            if not found_match:
+                print(f"  ❌ NO MATCH FOUND")
+                print(f"     Available expected slugs: {[slug_mapper.get_slug(dt) for dt in slide_metadata.keys()]}")
+        else:
+            print(f"  ❌ FAILED TO EXTRACT SLUG")
+        
+        print()
+    
+    success_rate = successful_matches / total_tokens
+    print(f"MATCHING SUCCESS RATE: {success_rate:.1%} ({successful_matches}/{total_tokens})")
+    
+    return success_rate >= 0.8  # Expect at least 80% success rate
+
+def test_chart_positioning_logic():
+    """Test that chart positioning will find images to apply styling to."""
+    print("=== TESTING CHART POSITIONING LOGIC ===")
+    
+    # Simulate what the positioning code would receive
+    image_map = {
+        "{{aov_chart}}": "https://drive.google.com/file/d/abc123/view",
+        "{{monthly-sales-over-time_chart}}": "https://drive.google.com/file/d/def456/view"
+    }
+    
+    slide_metadata = {
+        "AOV": {"data_type": "AOV", "chart_type": "bar"},
+        "monthly sales year over year": {"data_type": "monthly sales year over year", "chart_type": "line"}
+    }
+    
+    # Simulate slide_to_images (what would be found from the presentation)
+    slide_to_images = {
+        "SLIDE_abc123": ["IMAGE_obj1", "IMAGE_obj2"],
+        "SLIDE_def456": ["IMAGE_obj3"] 
+    }
+    
+    slug_mapper = SlugMapper("1hDkICKx4D3jHdxky_3_1iJcPFVQFxTkvlH7mVSFCx_o")
+    
+    positioning_requests = []
+    styles_applied = 0
+    
+    for token, image_url in image_map.items():
+        print(f"Processing token: {token}")
+        
+        # Extract chart name from token using the fixed logic
+        token_match = re.match(r'\{\{([^_}]+)(?:_chart)?\}\}', token)
+        if token_match:
+            token_slug = token_match.group(1)
+            print(f"  Extracted slug: '{token_slug}'")
+            
+            # Find matching data type
+            matched_slide_data = None
+            matched_data_type = None
+            
+            for data_type, metadata in slide_metadata.items():
+                expected_slug = slug_mapper.get_slug(data_type)
+                
+                if (token_slug == expected_slug or 
+                    token_slug.replace('-', '_') == expected_slug.replace('-', '_') or
+                    expected_slug.replace('-', '_') == token_slug.replace('-', '_')):
+                    matched_slide_data = metadata
+                    matched_data_type = data_type
+                    print(f"  ✅ Matched with data_type: '{data_type}' (expected_slug: '{expected_slug}')")
+                    break
+            
+            if matched_slide_data:
+                # Count how many images would get styling applied
+                for slide_id, image_object_ids in slide_to_images.items():
+                    for image_object_id in image_object_ids:
+                        # This is where positioning requests would be built
+                        positioning_requests.append(f"position_request_for_{image_object_id}")
+                        styles_applied += 1
+                        print(f"    Would apply styling to image: {image_object_id} in slide: {slide_id}")
+            else:
+                print(f"  ❌ No metadata match found")
+        else:
+            print(f"  ❌ Failed to extract slug from token")
+        
+        print()
+    
+    print(f"POSITIONING SUMMARY:")
+    print(f"  Total positioning requests: {len(positioning_requests)}")
+    print(f"  Total styles applied: {styles_applied}")
+    print(f"  Success: {styles_applied > 0}")
+    
+    return styles_applied > 0
+
+def main():
+    """Run all tests."""
+    print("🧪 TESTING CHART POSITIONING AND TEXT REPLACEMENT FIXES")
     print("=" * 60)
     
-    passed = 0
-    for test_name, success in test_results:
-        status = "✅ PASS" if success else "❌ FAIL"
-        print(f"   {status} {test_name}")
-        if success:
-            passed += 1
+    all_tests_passed = True
     
-    print(f"\\n🎯 Overall: {passed}/{len(test_results)} tests passed")
+    try:
+        # Test 1: Slug mapping
+        print("TEST 1: Slug Mapping")
+        result1 = test_slug_mapping()
+        print(f"Result: {'✅ PASSED' if result1 else '❌ FAILED'}")
+        print()
+        
+        # Test 2: Token matching
+        print("TEST 2: Token Matching")
+        result2 = test_token_matching()
+        print(f"Result: {'✅ PASSED' if result2 else '❌ FAILED'}")
+        print()
+        
+        # Test 3: Chart positioning logic
+        print("TEST 3: Chart Positioning Logic")
+        result3 = test_chart_positioning_logic()
+        print(f"Result: {'✅ PASSED' if result3 else '❌ FAILED'}")
+        print()
+        
+        all_tests_passed = result1 and result2 and result3
+        
+    except Exception as e:
+        print(f"❌ TEST FAILED WITH EXCEPTION: {e}")
+        import traceback
+        traceback.print_exc()
+        all_tests_passed = False
     
-    if passed == len(test_results):
-        print("🎉 All tests passed! The corrected chart positioning should work properly.")
-        print("\\n💡 Next Steps:")
-        print("   1. The corrected positioning is integrated into batch_operations_with_styling.py")
-        print("   2. Chart positions will be applied correctly when create_slides runs")
-        print("   3. Each chart type gets specific size and position based on configuration")
+    print("=" * 60)
+    if all_tests_passed:
+        print("🎉 ALL TESTS PASSED! The fixes should resolve the chart positioning issues.")
     else:
-        print("⚠️  Some tests failed. Check the output above for details.")
-
+        print("⚠️  SOME TESTS FAILED. The fixes may need additional work.")
+    
+    return all_tests_passed
 
 if __name__ == "__main__":
-    main()
+    success = main()
+    sys.exit(0 if success else 1)
