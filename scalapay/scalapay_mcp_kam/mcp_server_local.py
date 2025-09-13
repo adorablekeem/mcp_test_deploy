@@ -332,7 +332,7 @@ def provide_recent_document(path: str):
 if __name__ == "__main__":
     logger.info("🚀 Starting MCP server")
     try:
-        mcp.run(transport="http", host="0.0.0.0", port=8005)
+        mcp.run(transport="streamable-http", host="0.0.0.0", port=8005)
     except Exception:
         logger.exception("❌ MCP crashed")
         sys.exit(1)

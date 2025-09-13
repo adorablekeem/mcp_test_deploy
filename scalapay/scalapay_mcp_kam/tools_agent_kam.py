@@ -125,7 +125,7 @@ async def create_slides(merchant_token: str, starting_date: str, end_date: str, 
     try:
         # Text and image replacements with positioning (original pattern)
         text_mapping = {"bot": merchant_token}
-        image_mapping = {"image1": direct_url, "image2": direct_url}
+        image_mapping = {"{{}}": direct_url, "image2": direct_url}
         
         # Original positioning logic - simple translateX/translateY in points
         positioning = {
