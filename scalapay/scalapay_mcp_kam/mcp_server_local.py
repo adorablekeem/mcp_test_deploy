@@ -7,11 +7,9 @@ from dataclasses import dataclass
 from dotenv import load_dotenv
 from fastmcp import Context, FastMCP
 from langchain_core.runnables import RunnableConfig
-from markitdown import MarkItDown
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-md = MarkItDown()
 import logging
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(levelname)s %(name)s: %(message)s")
@@ -323,8 +321,6 @@ def provide_recent_document(path: str):
         if not os.path.exists(file_path):
             return f"File not found: {file_path}"
 
-        # Convert to text using markitdown
-        return md.convert(file_path).text_content
     except Exception as e:
         return f"Error accessing document: {str(e)}"
 

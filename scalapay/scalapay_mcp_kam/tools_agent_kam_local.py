@@ -25,7 +25,6 @@ from scalapay.scalapay_mcp_kam.agents.agent_matplot import mcp_matplot_run
 # Clean positioning system integration
 from scalapay.scalapay_mcp_kam.positioning import configure_positioning, get_positioning_status
 from scalapay.scalapay_mcp_kam.positioning import health_check as positioning_health_check
-from scalapay.scalapay_mcp_kam.positioning.clean_replacements import fill_template_with_clean_positioning
 from scalapay.scalapay_mcp_kam.prompts.charts_prompt import (
     GENERAL_CHART_PROMPT,
     SLIDES_GENERATION_PROMPT,
