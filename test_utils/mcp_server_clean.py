@@ -3,12 +3,12 @@
 MCP Server startup script with warning fixes applied.
 """
 
-import warnings
 import os
+import warnings
 
 # Suppress all the MCP warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="pydantic.*")
-warnings.filterwarnings("ignore", message=".*__fields__ attribute is deprecated.*")  
+warnings.filterwarnings("ignore", message=".*__fields__ attribute is deprecated.*")
 warnings.filterwarnings("ignore", message=".*PydanticDeprecatedSince20.*")
 warnings.filterwarnings("ignore", message=".*datetime.datetime.utcnow.*")
 warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*coroutine.*was never awaited.*")
@@ -19,4 +19,5 @@ os.environ["PYTHONWARNINGS"] = "ignore::DeprecationWarning,ignore::PydanticDepre
 # Now import and run the MCP server
 if __name__ == "__main__":
     from scalapay.scalapay_mcp_kam.mcp_server import main
+
     main()

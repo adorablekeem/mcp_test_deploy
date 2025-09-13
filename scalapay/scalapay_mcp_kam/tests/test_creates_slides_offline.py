@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
-import os
-import sys
 import argparse
 import logging
+import os
+import sys
+
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 # --- logging ---
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(levelname)s] %(message)s'
-)
+logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] %(message)s")
 log = logging.getLogger("make_public_test")
 
 # --- config: service account json path (or rely on env already set) ---
 # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/path/to/your/service_account.json"
+
 
 # --- helpers ---
 def build_drive():
@@ -28,11 +27,13 @@ def build_drive():
         log.error("Failed to build Drive service: %s", e)
         raise
 
+
 def clean_id(file_id: str) -> str:
     """
     Strip whitespace and trailing punctuation often introduced by copy/paste.
     """
     return (file_id or "").strip().strip(" .\t\r\n")
+
 
 def file_exists(drive, file_id: str) -> bool:
     """
@@ -40,25 +41,25 @@ def file_exists(drive, file_id: str) -> bool:
     """
     try:
         drive.files().get(
-            fileId=file_id,
-            fields="id,name,parents,driveId,owners,emailAddress,permissionIds",
-            supportsAllDrives=True
+            fileId=file_id, fields="id,name,parents,driveId,owners,emailAddress,permissionIds", supportsAllDrives=True
         ).execute()
         return True
     except HttpError as e:
         log.debug("file_exists(%s) -> HttpError %s", file_id, e)
         return False
 
+
 def get_file_meta(drive, file_id: str) -> dict | None:
     try:
-        return drive.files().get(
-            fileId=file_id,
-            fields="id,name,parents,driveId,owners,permissions",
-            supportsAllDrives=True
-        ).execute()
+        return (
+            drive.files()
+            .get(fileId=file_id, fields="id,name,parents,driveId,owners,permissions", supportsAllDrives=True)
+            .execute()
+        )
     except HttpError as e:
         log.debug("get_file_meta(%s) -> HttpError %s", file_id, e)
         return None
+
 
 def make_file_public(drive, file_id: str) -> None:
     """
@@ -74,24 +75,29 @@ def make_file_public(drive, file_id: str) -> None:
     ).execute()
     log.info("Made public: %s", file_id)
 
+
 def show_permissions(drive, file_id: str):
     """
     Print a compact view of current permissions.
     """
     try:
-        perms_resp = drive.permissions().list(
-            fileId=file_id,
-            fields="permissions(id,type,role,domain,allowFileDiscovery)"
-        ).execute()
+        perms_resp = (
+            drive.permissions()
+            .list(fileId=file_id, fields="permissions(id,type,role,domain,allowFileDiscovery)")
+            .execute()
+        )
         perms = perms_resp.get("permissions", [])
         if not perms:
             print("  (no permissions listed)")
             return
         for p in perms:
-            print(f"  - id={p.get('id')} type={p.get('type')} role={p.get('role')} "
-                  f"domain={p.get('domain')} discoverable={p.get('allowFileDiscovery')}")
+            print(
+                f"  - id={p.get('id')} type={p.get('type')} role={p.get('role')} "
+                f"domain={p.get('domain')} discoverable={p.get('allowFileDiscovery')}"
+            )
     except HttpError as e:
         print("  (failed to list permissions):", e)
+
 
 def test_scenario(drive, raw_id: str) -> int:
     """
@@ -140,6 +146,7 @@ def test_scenario(drive, raw_id: str) -> int:
 
     return exit_code
 
+
 def main():
     ap = argparse.ArgumentParser(description="Test make_file_public with raw vs cleaned Drive IDs.")
     ap.add_argument("--id", required=True, help="Drive file ID (you can paste with a trailing dot to test).")
@@ -155,6 +162,7 @@ def main():
 
     code = test_scenario(drive, args.id)
     sys.exit(code)
+
 
 if __name__ == "__main__":
     main()

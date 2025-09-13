@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-import os
-import io
-import base64
 import argparse
+import base64
+import io
+import os
 import time
+
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
+
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./scalapay/scalapay_mcp_kam/credentials.json"
+
 
 # ---------- helpers ----------
 def build_services():
@@ -15,25 +18,26 @@ def build_services():
     slides = build("slides", "v1")
     return drive, slides
 
+
 def resolve_shortcut(drive, file_id: str) -> str:
-    f = drive.files().get(
-        fileId=file_id,
-        fields="id,name,mimeType,shortcutDetails,driveId",
-        supportsAllDrives=True
-    ).execute()
+    f = (
+        drive.files()
+        .get(fileId=file_id, fields="id,name,mimeType,shortcutDetails,driveId", supportsAllDrives=True)
+        .execute()
+    )
     if f.get("mimeType") == "application/vnd.google-apps.shortcut":
         return f["shortcutDetails"]["targetId"]
     return file_id
 
+
 def probe_folder(drive, folder_id: str):
-    info = drive.files().get(
-        fileId=folder_id,
-        fields="id,name,mimeType,parents,driveId",
-        supportsAllDrives=True
-    ).execute()
+    info = (
+        drive.files().get(fileId=folder_id, fields="id,name,mimeType,parents,driveId", supportsAllDrives=True).execute()
+    )
     if info["mimeType"] != "application/vnd.google-apps.folder":
         raise RuntimeError(f"ID {folder_id} is not a folder (mimeType={info['mimeType']})")
     return info
+
 
 def upload_png(drive, local_path: str, name: str, parent_folder_id: str | None):
     # Resolve shortcut
@@ -46,19 +50,21 @@ def upload_png(drive, local_path: str, name: str, parent_folder_id: str | None):
         body["parents"] = [parent_folder_id]
 
     try:
-        f = drive.files().create(
-            body=body, media_body=media, fields="id,parents", supportsAllDrives=True
-        ).execute()
+        f = drive.files().create(body=body, media_body=media, fields="id,parents", supportsAllDrives=True).execute()
         return f["id"]
     except HttpError as e:
         # Fallback: create in root then move to target folder
         if parent_folder_id and e.resp.status in (400, 404):
-            f = drive.files().create(
-                body={"name": name, "mimeType": "image/png"},
-                media_body=media,
-                fields="id,parents",
-                supportsAllDrives=True
-            ).execute()
+            f = (
+                drive.files()
+                .create(
+                    body={"name": name, "mimeType": "image/png"},
+                    media_body=media,
+                    fields="id,parents",
+                    supportsAllDrives=True,
+                )
+                .execute()
+            )
             file_id = f["id"]
             old_parents = ",".join(f.get("parents", []))
             drive.files().update(
@@ -66,82 +72,78 @@ def upload_png(drive, local_path: str, name: str, parent_folder_id: str | None):
                 addParents=parent_folder_id,
                 removeParents=old_parents,
                 fields="id,parents",
-                supportsAllDrives=True
+                supportsAllDrives=True,
             ).execute()
             return file_id
         raise
 
+
 def make_public(drive, file_id: str):
     try:
-        drive.permissions().create(
-            fileId=file_id,
-            body={"type": "anyone", "role": "reader"},
-            fields="id"
-        ).execute()
+        drive.permissions().create(fileId=file_id, body={"type": "anyone", "role": "reader"}, fields="id").execute()
     except HttpError as e:
         if e.resp.status not in (400, 403, 409):
             raise
 
+
 def drive_direct_view_url(file_id: str) -> str:
     return f"https://drive.google.com/uc?export=view&id={file_id}"
+
 
 def copy_template_to_folder(drive, template_id: str, new_name: str, folder_id: str | None) -> str:
     copy_body = {"name": new_name}
     if folder_id:
         folder_id = resolve_shortcut(drive, folder_id)
         copy_body["parents"] = [folder_id]
-    pres = drive.files().copy(
-        fileId=template_id, body=copy_body, fields="id,parents", supportsAllDrives=True
-    ).execute()
+    pres = drive.files().copy(fileId=template_id, body=copy_body, fields="id,parents", supportsAllDrives=True).execute()
     return pres["id"]
+
 
 def insert_simple_slide_with_image(slides, presentation_id: str, image_url: str):
     slide_id = f"slide_test_{int(time.time())}"
     title_id = f"title_{slide_id}"
-    img_id   = f"img_{slide_id}"
+    img_id = f"img_{slide_id}"
 
     # Use a real layout from your list. Good choices:
     # p84 = "LATERAL BOX (For Charts) - Blue"
     LAYOUT_ID = "p86"
 
     requests = [
+        {"createSlide": {"objectId": slide_id, "insertionIndex": 1}},
+        # Title
         {
-            "createSlide": {
-                "objectId": slide_id,
-                "insertionIndex": 1
+            "createShape": {
+                "objectId": title_id,
+                "shapeType": "TEXT_BOX",
+                "elementProperties": {
+                    "pageObjectId": slide_id,
+                    "size": {"width": {"magnitude": 896, "unit": "PT"}, "height": {"magnitude": 48, "unit": "PT"}},
+                    "transform": {"scaleX": 1, "scaleY": 1, "translateX": 32, "translateY": 32, "unit": "PT"},
+                },
             }
         },
-        # Title
-        {"createShape": {
-            "objectId": title_id,
-            "shapeType": "TEXT_BOX",
-            "elementProperties": {
-                "pageObjectId": slide_id,
-                "size": {"width": {"magnitude": 896, "unit": "PT"},
-                         "height": {"magnitude": 48,  "unit": "PT"}},
-                "transform": {"scaleX": 1, "scaleY": 1, "translateX": 32, "translateY": 32, "unit": "PT"},
-            }
-        }},
         {"insertText": {"objectId": title_id, "text": "Test Image Upload"}},
-        {"updateTextStyle": {"objectId": title_id,
-                             "style": {"bold": True, "fontSize": {"magnitude": 24, "unit": "PT"}},
-                             "fields": "bold,fontSize"}},
-
-        # Image
-        {"createImage": {
-            "objectId": img_id,
-            "url": image_url,
-            "elementProperties": {
-                "pageObjectId": slide_id,
-                "size": {"width": {"magnitude": 640, "unit": "PT"},
-                         "height": {"magnitude": 360, "unit": "PT"}},
-                "transform": {"scaleX": 1, "scaleY": 1, "translateX": 160, "translateY": 120, "unit": "PT"},
+        {
+            "updateTextStyle": {
+                "objectId": title_id,
+                "style": {"bold": True, "fontSize": {"magnitude": 24, "unit": "PT"}},
+                "fields": "bold,fontSize",
             }
-        }},
+        },
+        # Image
+        {
+            "createImage": {
+                "objectId": img_id,
+                "url": image_url,
+                "elementProperties": {
+                    "pageObjectId": slide_id,
+                    "size": {"width": {"magnitude": 640, "unit": "PT"}, "height": {"magnitude": 360, "unit": "PT"}},
+                    "transform": {"scaleX": 1, "scaleY": 1, "translateX": 160, "translateY": 120, "unit": "PT"},
+                },
+            }
+        },
     ]
-    slides.presentations().batchUpdate(
-        presentationId=presentation_id, body={"requests": requests}
-    ).execute()
+    slides.presentations().batchUpdate(presentationId=presentation_id, body={"requests": requests}).execute()
     return slide_id
 
 
@@ -155,6 +157,7 @@ def export_pdf(drive, file_id: str, out_path: str):
         if status:
             print(f"PDF progress: {int(status.progress() * 100)}%")
     return out_path
+
 
 # ---------- main ----------
 def main():
@@ -206,14 +209,18 @@ def main():
 
     print("\n✅ All done.")
 
+
 from googleapiclient.discovery import build
+
 slides = build("slides", "v1")
+
 
 def print_layouts(presentation_id: str):
     pres = slides.presentations().get(presentationId=presentation_id).execute()
     for l in pres.get("layouts", []):
         props = l.get("layoutProperties", {})
         print(f"- id={l['objectId']}  name={props.get('name')}  displayName={props.get('displayName')}")
+
 
 if __name__ == "__main__":
     # Requires GOOGLE_APPLICATION_CREDENTIALS to point to your service account JSON.

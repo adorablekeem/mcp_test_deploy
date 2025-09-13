@@ -1,0 +1,27 @@
+{
+  "execution_id": "concurrent_20250910_171025_615_chart_3",
+  "created_at": "2025-09-10T17:11:10.645615",
+  "base_folder": "plots",
+  "charts_folder": "plots/execution_concurrent_20250910_171025_615_chart_3/charts",
+  "enable_execution_folders": true,
+  "charts": [
+    {
+      "data_type": "AOV",
+      "chart_path": "plots/execution_concurrent_20250910_171025_615_chart_3/charts/AOV_1757517070_concurre.png",
+      "filename": "AOV_1757517070_concurre.png",
+      "registered_at": "2025-09-10T17:11:10.645992",
+      "correlation_id": "concurrent_20250910_171025_615_chart_3",
+      "file_size": 139389,
+      "metadata": {
+        "data_type": "AOV",
+        "correlation_id": "concurrent_20250910_171025_615_chart_3",
+        "chart_type": "unknown",
+        "generated_at": "2025-09-10 17:11:10",
+        "concurrent_generation": true
+      }
+    }
+  ],
+  "total_charts": 1,
+  "status": "active",
+  "last_updated": "2025-09-10T17:11:10.646032"
+}

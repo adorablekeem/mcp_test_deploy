@@ -6,18 +6,15 @@ import io
 import json
 import logging
 import os
+import string
 import time
 import unicodedata
-import string
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
-from GoogleApiSupport.slides import Transform
-from GoogleApiSupport.slides import execute_batch_update
-from GoogleApiSupport.slides import get_all_shapes_placeholders
-
+from GoogleApiSupport.slides import Transform, execute_batch_update, get_all_shapes_placeholders
 
 # ---------------------------
 # Logging
@@ -183,7 +180,7 @@ def export_presentation_pdf(drive, presentation_id: str, out_path: str) -> str:
 def build_text_and_image_maps(results: Dict[str, Any], template_id: str = None) -> (Dict[str, str], List[Dict[str, str]]):
     """Return text_map (token->value), sections list with chart_path."""
     from scalapay.scalapay_mcp_kam.utils.slug_validation import SlugMapper
-    
+
     # Initialize slug mapper if template_id provided
     slug_mapper = SlugMapper(template_id) if template_id else None
     
@@ -225,9 +222,9 @@ async def build_text_and_image_maps_enhanced(
         - sections: Section metadata with both content types
         - notes_map: Token mappings for speaker notes content (full paragraphs)
     """
-    from scalapay.scalapay_mcp_kam.agents.agent_alfred import process_slide_paragraph, _infer_chart_type
+    from scalapay.scalapay_mcp_kam.agents.agent_alfred import _infer_chart_type, process_slide_paragraph
     from scalapay.scalapay_mcp_kam.utils.slug_validation import SlugMapper
-    
+
     # Initialize slug mapper if template_id provided
     slug_mapper = SlugMapper(template_id) if template_id else None
     

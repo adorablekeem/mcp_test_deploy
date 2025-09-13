@@ -1,0 +1,22 @@
+"""
+Prompts package for Scalapay MCP KAM tools.
+Contains chart generation and slide creation prompts.
+"""
+
+from .charts_prompt import (
+    GENERAL_CHART_PROMPT,
+    MONTHLY_SALES_PROMPT,
+    ORDERS_BY_USER_TYPE_PROMPT,
+    SLIDE_CONTENT_OPTIMIZATION_PROMPT,
+    SLIDES_GENERATION_PROMPT,
+    STRUCTURED_CHART_SCHEMA_PROMPT,
+)
+
+__all__ = [
+    "GENERAL_CHART_PROMPT",
+    "SLIDES_GENERATION_PROMPT",
+    "STRUCTURED_CHART_SCHEMA_PROMPT",
+    "SLIDE_CONTENT_OPTIMIZATION_PROMPT",
+    "MONTHLY_SALES_PROMPT",
+    "ORDERS_BY_USER_TYPE_PROMPT",
+]

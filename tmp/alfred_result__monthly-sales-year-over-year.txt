@@ -1,41 +1,41 @@
 {
     'structured_data': {
         '2023': {
-            'January': 1061.75,
-            'February': 869.4,
-            'March': 744.93,
-            'April': 722.7,
-            'May': 4562.89,
-            'June': 4155.9,
-            'July': 4330.39,
-            'August': 1716.78,
-            'September': 2450.7,
-            'October': 2793.41,
-            'November': 2804.4,
-            'December': 2752.8
+            '1': 10500.0,
+            '2': 9500.0,
+            '3': 12300.0,
+            '4': 8600.0,
+            '5': 11000.0,
+            '6': 9700.0,
+            '7': 10300.0,
+            '8': 11500.0,
+            '9': 9800.0,
+            '10': 8700.0,
+            '11': 12200.0,
+            '12': 11900.0
         },
         '2024': {
-            'January': 2051.89,
-            'February': 2516.62,
-            'March': 2017.79,
-            'April': 2836.5,
-            'May': 2022.44,
-            'June': 2747.1,
-            'July': 2564.63,
-            'August': 2497.36,
-            'September': 2937.6,
-            'October': 2399.71,
-            'November': 1652.1,
-            'December': 3689.62
+            '1': 10800.0,
+            '2': 9900.0,
+            '3': 12500.0,
+            '4': 8900.0,
+            '5': 11300.0,
+            '6': 10100.0,
+            '7': 10600.0,
+            '8': 11800.0,
+            '9': 10000.0,
+            '10': 9000.0,
+            '11': 12500.0,
+            '12': 12200.0
         },
         '2025': {
-            'January': 1190.4,
-            'February': 3879.68,
-            'March': 4392.39,
-            'April': 4266.0,
-            'May': 3406.9,
-            'June': 4048.8
+            '1': 11000.0,
+            '2': 10100.0,
+            '3': 12700.0,
+            '4': 9200.0,
+            '5': 11600.0,
+            '6': 10300.0
         }
     },
-    'paragraph': 'The sales data for the merchant 2L8082NCG from January 2023 to June 2025 shows variability in monthly sales figures. In 2023, a peak was observed in May with a revenue of 4562.89, followed by a considerable fluctuation throughout the year, ending with a minor decline in December. The year 2024 demonstrated a more balanced sales trend with two peaks in April and December. However, 2025 indicates a rising trend in sales, with substantial growth noted in February and March. Overall, the merchant displays resilience and potential growth, with key months of success across the observed period.'
+    'paragraph': 'The sales data for merchant 1WU46Y4ZMHQ9 from January 2023 to June 2025 shows a consistent upward trend. In 2023, there was some fluctuation, with sales peaking in March and November. The year 2024 displayed a steadier performance, maintaining growth across most months. Early 2025 indicates a continuation of this upward trajectory with gains each month compared to the same period in the previous year, potential signals of seasonality and effective business strategies.'
 }

@@ -4,7 +4,7 @@
 			"url": "https://mcp-test-deploy-2.onrender.com/mcp/",
 			"type": "http"
 		},
-		"test-kam": {
+		"Account Manager AI Agent": {
 			"url": "http://0.0.0.0:8005/mcp",
 			"type": "http"
 		},
@@ -14,7 +14,10 @@
 			"env": {
 				"GOOGLE_APPLICATION_CREDENTIALS": "/Users/keem.adorable@scalapay.com/scalapay/scalapay_mcp_kam/scalapay/scalapay_mcp_kam/credentials.json"
 			}
+		},
+    	"Account Manager AI Agent Test": {
+			"url": "http://0.0.0.0:8022/mcp",
+			"type": "http"
 		}
-	},
-	"inputs": []
-}
+	}
+}	

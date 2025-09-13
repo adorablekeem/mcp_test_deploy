@@ -1,0 +1,29 @@
+{
+    'structured_data': {
+        '20-29 years': {
+            'total_users': 500,
+            'percentage': 25.0
+        },
+        '30-39 years': {
+            'total_users': 600,
+            'percentage': 30.0
+        },
+        '40-49 years': {
+            'total_users': 400,
+            'percentage': 20.0
+        },
+        '50-59 years': {
+            'total_users': 300,
+            'percentage': 15.0
+        },
+        '60-69 years': {
+            'total_users': 150,
+            'percentage': 7.5
+        },
+        '70-79 years': {
+            'total_users': 50,
+            'percentage': 2.5
+        }
+    },
+    'paragraph': 'The age distribution for merchant 1WU46Y4ZMHQ9 from 2023 to 2025 shows a significant concentration of users in the 30-39 year age band, accounting for 30% of the total user base. Following this, the 20-29 year and 40-49 year age bands represent 25% and 20% respectively. Users aged between 50-59 account for 15%, while those in the 60-69 age range make up 7.5%. The 70-79 year age band is the smallest demographic, comprising only 2.5% of users. This age distribution suggests a youthful to middle-aged clientele, with potential implications for targeting marketing strategies and product offerings.'
+}

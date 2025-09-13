@@ -1,6 +1,7 @@
 {
     'structured_data': {
-        
+        'Male': 55.5,
+        'Female': 44.5
     },
-    'paragraph': ''  
+    'paragraph': 'The demographic breakdown of Scalapay users for the merchant "1WU46Y4ZMHQ9" from 2023-01-01 to 2025-06-30 shows that a greater percentage of users were male (55.5%) compared to female users (44.5%). This indicates a higher engagement of male users with the merchant during this period. The trend can inform targeted marketing strategies, suggesting a potential to increase engagement among female users to balance the demographic distribution.'
 }

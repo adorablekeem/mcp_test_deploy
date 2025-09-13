@@ -1,9 +1,11 @@
 import logging
 from typing import Any, Union
 
+
 # Define your custom McpError and ErrorCode (you may adjust this to match your structure)
 class ErrorCode:
     InternalError = "InternalError"
+
 
 class McpError(Exception):
     def __init__(self, code: str, message: str):
@@ -16,12 +18,7 @@ def extract_raw_error_message(err: Any) -> str:
     """Extracts a readable message from a complex error object."""
     if isinstance(err, dict) and "response" in err:
         try:
-            return (
-                err.get("response", {})
-                   .get("data", {})
-                   .get("error", {})
-                   .get("message", str(err))
-            )
+            return err.get("response", {}).get("data", {}).get("error", {}).get("message", str(err))
         except Exception:
             return str(err)
 

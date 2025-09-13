@@ -1,8 +1,9 @@
-from googleapiclient.discovery import Resource
-from typing import Any, Dict, List, Optional
-from error_handler import handle_google_api_error  # Your custom error handler
-from schemas import SummarizePresentationArgs  # Define with 'presentation_id' and 'include_notes'
 import json
+from typing import Any, Dict, List, Optional
+
+from error_handler import handle_google_api_error  # Your custom error handler
+from googleapiclient.discovery import Resource
+from schemas import SummarizePresentationArgs  # Define with 'presentation_id' and 'include_notes'
 
 
 def extract_text(elements: Optional[List[Dict[str, Any]]]) -> List[str]:
@@ -29,10 +30,7 @@ def extract_text(elements: Optional[List[Dict[str, Any]]]) -> List[str]:
     return result
 
 
-def summarize_presentation_tool(
-    slides: Resource,
-    args: SummarizePresentationArgs
-) -> Dict[str, Any]:
+def summarize_presentation_tool(slides: Resource, args: SummarizePresentationArgs) -> Dict[str, Any]:
     """
     Extracts text content from all slides in a presentation for summarization.
 
@@ -46,29 +44,38 @@ def summarize_presentation_tool(
     include_notes = args.include_notes is True
 
     try:
-        response = slides.presentations().get(
-            presentationId=args.presentation_id,
-            fields=(
-                "presentationId,title,revisionId,"
-                "slides(objectId,pageElements(shape(text(textElements(textRun(content)))),"
-                "table(tableRows(tableCells(text(textElements(textRun(content))))))),"
-                "slideProperties(notesPage(pageElements(shape(text(textElements(textRun(content))))))))"
+        response = (
+            slides.presentations()
+            .get(
+                presentationId=args.presentation_id,
+                fields=(
+                    "presentationId,title,revisionId,"
+                    "slides(objectId,pageElements(shape(text(textElements(textRun(content)))),"
+                    "table(tableRows(tableCells(text(textElements(textRun(content))))))),"
+                    "slideProperties(notesPage(pageElements(shape(text(textElements(textRun(content))))))))"
+                ),
             )
-        ).execute()
+            .execute()
+        )
 
         presentation = response
         slides_data = presentation.get("slides", [])
 
         if not slides_data:
             return {
-                "content": [{
-                    "type": "text",
-                    "text": json.dumps({
-                        "title": presentation.get("title", "Untitled Presentation"),
-                        "slideCount": 0,
-                        "summary": "This presentation contains no slides."
-                    }, indent=2)
-                }]
+                "content": [
+                    {
+                        "type": "text",
+                        "text": json.dumps(
+                            {
+                                "title": presentation.get("title", "Untitled Presentation"),
+                                "slideCount": 0,
+                                "summary": "This presentation contains no slides.",
+                            },
+                            indent=2,
+                        ),
+                    }
+                ]
             }
 
         slides_content = []
@@ -82,11 +89,7 @@ def summarize_presentation_tool(
                 notes_elements = slide.get("slideProperties", {}).get("notesPage", {}).get("pageElements", [])
                 notes_content = " ".join(extract_text(notes_elements)).strip()
 
-            slide_summary = {
-                "slideNumber": slide_number,
-                "slideId": slide_id,
-                "content": content
-            }
+            slide_summary = {"slideNumber": slide_number, "slideId": slide_id, "content": content}
             if include_notes and notes_content:
                 slide_summary["notes"] = notes_content
 
@@ -95,13 +98,13 @@ def summarize_presentation_tool(
         summary = {
             "title": presentation.get("title", "Untitled Presentation"),
             "slideCount": len(slides_content),
-            "lastModified": f"Revision {presentation.get('revisionId')}" if presentation.get("revisionId") else "Unknown",
-            "slides": slides_content
+            "lastModified": f"Revision {presentation.get('revisionId')}"
+            if presentation.get("revisionId")
+            else "Unknown",
+            "slides": slides_content,
         }
 
-        return {
-            "content": [{"type": "text", "text": json.dumps(summary, indent=2)}]
-        }
+        return {"content": [{"type": "text", "text": json.dumps(summary, indent=2)}]}
 
     except Exception as error:
         raise handle_google_api_error(error, "summarize_presentation")

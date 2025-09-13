@@ -14,6 +14,7 @@ from typing import Any, Dict, Optional
 from langchain_openai import ChatOpenAI
 from mcp_use import MCPAgent, MCPClient
 
+
 # ---------- small helpers ----------
 def parse_json_from_text(text: str):
     """
@@ -38,7 +39,7 @@ def parse_json_from_text(text: str):
     start = text.find("{")
     end = text.rfind("}")
     if start != -1 and end != -1 and end > start:
-        candidate = text[start:end+1].strip()
+        candidate = text[start : end + 1].strip()
         return json.loads(candidate)
 
     # 4) last resort: replace single quotes and try whole string
@@ -48,9 +49,11 @@ def parse_json_from_text(text: str):
     except Exception:
         raise ValueError("Could not find valid JSON in response")
 
+
 def _slug(s: str) -> str:
     s = re.sub(r"[^a-zA-Z0-9_-]+", "-", s.strip().lower())
     return re.sub(r"-+", "-", s).strip("-") or "item"
+
 
 def _persist_plot(path: str | None, key: str, out_dir: str = "./plots") -> Optional[str]:
     if not isinstance(path, str) or not path.lower().endswith(".png"):
@@ -62,6 +65,7 @@ def _persist_plot(path: str | None, key: str, out_dir: str = "./plots") -> Optio
             dst.write(src.read())
         return target
     return None
+
 
 async def _discover_tool(agent: MCPAgent, server_id: str, tool_name: str):
     """
@@ -79,6 +83,7 @@ async def _discover_tool(agent: MCPAgent, server_id: str, tool_name: str):
         raise RuntimeError(f"Tool '{tool_name}' not found on server '{server_id}'. Available: {names}")
     return candidates[0]
 
+
 def _find_latest_png_in_workspace(workspace: str | None) -> Optional[str]:
     if not workspace or not os.path.isdir(workspace):
         return None
@@ -87,7 +92,9 @@ def _find_latest_png_in_workspace(workspace: str | None) -> Optional[str]:
         return None
     return max(pngs, key=os.path.getmtime)
 
+
 # ---------- core tests ----------
+
 
 async def test_alfred(agent: MCPAgent) -> Dict[str, Any]:
     """
@@ -126,6 +133,7 @@ IMPORTANT: Output must be valid JSON. No prose outside JSON.
     print("✅ Alfred returned structured_data with keys:", list(data["structured_data"].keys()))
     return data
 
+
 async def test_matplot_direct(agent: MCPAgent, instruction: str) -> Dict[str, Any]:
     """
     Call MatPlotAgent.generate_chart_simple directly (no planner).
@@ -163,22 +171,31 @@ async def test_matplot_direct(agent: MCPAgent, instruction: str) -> Dict[str, An
 
     return result
 
+
 # ---------- scenario orchestration ----------
+
 
 async def main():
     parser = argparse.ArgumentParser(description="End-to-end MCP test (Alfred + MatPlot).")
     parser.add_argument("--alfred", default="http://127.0.0.1:8000/mcp", help="Alfred MCP URL")
     parser.add_argument("--matplot", default="http://127.0.0.1:8010/mcp", help="MatPlot MCP URL")
-    parser.add_argument("--transport", default="streamable-http", choices=["http", "streamable-http"], help="MCP transport type (match server)")
+    parser.add_argument(
+        "--transport",
+        default="streamable-http",
+        choices=["http", "streamable-http"],
+        help="MCP transport type (match server)",
+    )
     args = parser.parse_args()
 
     # Build a single client with BOTH servers
-    client = MCPClient.from_dict({
-        "mcpServers": {
-            "Alfred":      {"url": args.alfred,  "type": args.transport},
-            "MatPlotAgent":{"url": args.matplot, "type": args.transport},
+    client = MCPClient.from_dict(
+        {
+            "mcpServers": {
+                "Alfred": {"url": args.alfred, "type": args.transport},
+                "MatPlotAgent": {"url": args.matplot, "type": args.transport},
+            }
         }
-    })
+    )
 
     llm = ChatOpenAI(model="gpt-4o")
     agent = MCPAgent(llm=llm, client=client, max_steps=8, verbose=True)
@@ -224,6 +241,7 @@ async def main():
         sys.exit(2)
 
     print("\n✅ End-to-end test succeeded.")
+
 
 if __name__ == "__main__":
     try:

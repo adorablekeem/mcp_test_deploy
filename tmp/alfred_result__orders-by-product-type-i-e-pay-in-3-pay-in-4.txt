@@ -1,8 +1,7 @@
 {
     'structured_data': {
-        'orders_by_product_type': {
-            'pay-in-3': 1080
-        }
+        'pay_in_3': 1500,
+        'pay_in_4': 1200
     },
-    'paragraph': 'The data indicates that from January 1, 2023, to June 30, 2025, the merchant "2L8082NCG" had a total of 1080 orders processed using the "pay-in-3" product type. This suggests a preference or substantial offering towards the "pay-in-3" payment option among customers during this period.'
+    'paragraph': 'The data indicates that the Pay in 3 product type had a higher order count compared to the Pay in 4 option between the specified dates. This suggests a customer preference towards making payments in three installments. Merchants may consider promoting the Pay in 3 option further or introducing incentives for choosing Pay in 4 to balance out the distribution.'
 }

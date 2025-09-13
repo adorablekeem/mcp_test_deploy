@@ -1,0 +1,6 @@
+{
+    'structured_data': {
+        'data': []
+    },
+    'paragraph': 'The data shows orders categorized by user types such as Scalapay Network, Returning, and New customers across various product types over the specified period. However, there are no records of orders for the merchant "1WU46Y4ZMHQ9" from 2023-01-01 to 2025-06-30. Any further analysis would require existing order data to identify trends or any significant observations.'
+}

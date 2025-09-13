@@ -1,0 +1,27 @@
+{
+  "execution_id": "concurrent_20250910_165615_821_chart_2",
+  "created_at": "2025-09-10T16:57:09.025038",
+  "base_folder": "plots",
+  "charts_folder": "plots/execution_concurrent_20250910_165615_821_chart_2/charts",
+  "enable_execution_folders": true,
+  "charts": [
+    {
+      "data_type": "monthly orders by user type",
+      "chart_path": "plots/execution_concurrent_20250910_165615_821_chart_2/charts/monthly_orders_by_user_type_1757516229_concurre.png",
+      "filename": "monthly_orders_by_user_type_1757516229_concurre.png",
+      "registered_at": "2025-09-10T16:57:09.025656",
+      "correlation_id": "concurrent_20250910_165615_821_chart_2",
+      "file_size": 251936,
+      "metadata": {
+        "data_type": "monthly orders by user type",
+        "correlation_id": "concurrent_20250910_165615_821_chart_2",
+        "chart_type": "unknown",
+        "generated_at": "2025-09-10 16:57:09",
+        "concurrent_generation": true
+      }
+    }
+  ],
+  "total_charts": 1,
+  "status": "active",
+  "last_updated": "2025-09-10T16:57:09.025694"
+}

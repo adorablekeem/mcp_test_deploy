@@ -1,0 +1,27 @@
+{
+  "execution_id": "concurrent_20250910_165615_821_chart_4",
+  "created_at": "2025-09-10T16:57:22.878899",
+  "base_folder": "plots",
+  "charts_folder": "plots/execution_concurrent_20250910_165615_821_chart_4/charts",
+  "enable_execution_folders": true,
+  "charts": [
+    {
+      "data_type": "scalapay users demographic in percentages",
+      "chart_path": "plots/execution_concurrent_20250910_165615_821_chart_4/charts/scalapay_users_demographic_in_percentages_1757516242_concurre.png",
+      "filename": "scalapay_users_demographic_in_percentages_1757516242_concurre.png",
+      "registered_at": "2025-09-10T16:57:22.879251",
+      "correlation_id": "concurrent_20250910_165615_821_chart_4",
+      "file_size": 171790,
+      "metadata": {
+        "data_type": "scalapay users demographic in percentages",
+        "correlation_id": "concurrent_20250910_165615_821_chart_4",
+        "chart_type": "unknown",
+        "generated_at": "2025-09-10 16:57:22",
+        "concurrent_generation": true
+      }
+    }
+  ],
+  "total_charts": 1,
+  "status": "active",
+  "last_updated": "2025-09-10T16:57:22.879293"
+}

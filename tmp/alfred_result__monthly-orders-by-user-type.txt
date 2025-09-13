@@ -1,35 +1,6 @@
 {
     'structured_data': {
-        "2023-01": {"known": 15},
-        "2023-02": {"known": 11},
-        "2023-03": {"known": 10},
-        "2023-04": {"known": 42},
-        "2023-05": {"known": 59},
-        "2023-06": {"known": 61},
-        "2023-07": {"known": 28},
-        "2023-08": {"known": 39},
-        "2023-09": {"known": 34},
-        "2023-10": {"known": 45},
-        "2023-11": {"known": 36},
-        "2023-12": {"known": 27},
-        "2024-01": {"known": 41},
-        "2024-02": {"known": 31},
-        "2024-03": {"known": 44},
-        "2024-04": {"known": 31},
-        "2024-05": {"known": 43},
-        "2024-06": {"known": 41},
-        "2024-07": {"known": 28},
-        "2024-08": {"known": 36},
-        "2024-09": {"known": 31},
-        "2024-10": {"known": 25},
-        "2024-11": {"known": 36},
-        "2024-12": {"known": 16},
-        "2025-01": {"known": 46},
-        "2025-02": {"known": 52},
-        "2025-03": {"known": 52},
-        "2025-04": {"known": 47},
-        "2025-05": {"known": 44},
-        "2025-06": {"known": 29}
+
     },
-    'paragraph': 'The analysis of merchant 2L8082NCG from January 2023 to June 2025 reveals that the majority of orders are placed by known users. There is a general trend of fluctuation in the number of orders, with notable peaks occurring in June 2023, June 2024, and March 2025. These periods may reflect promotional activities or seasonal influences driving customer engagement. A steady flow of orders persists across the timeline, pointing towards a stable base of returning customers for the merchant.'
+    'paragraph': ''  
 }

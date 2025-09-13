@@ -1,0 +1,67 @@
+RESIZE_DEFAULT = {
+    "mode": "ABSOLUTE",
+    "unit": "PT",
+    "scaleX": 200,
+    "scaleY": 200,
+    "translateX": 130,
+    "translateY": 250,
+}
+
+PER_CHART_RESIZE = {
+    "{{monthly-sales-over-time_chart}}": {
+        "mode": "ABSOLUTE",
+        "unit": "PT",
+        "scaleX": 180,
+        "scaleY": 180,
+        "translateX": 190,
+        "translateY": 190,
+    },
+    "{{monthly_sales_yoy_chart}}": {
+        "mode": "ABSOLUTE",
+        "unit": "PT",
+        "scaleX": 190,
+        "scaleY": 190,
+        "translateX": 110,
+        "translateY": 250,
+    },
+    "{{aov_chart}}": {
+        "mode": "ABSOLUTE",
+        "unit": "PT",
+        "scaleX": 180,
+        "scaleY": 180,
+        "translateX": 140,
+        "translateY": 240,
+    },
+    "{{scalapay-users-demographic-in-percentage_chart}}": {
+        "mode": "ABSOLUTE",
+        "unit": "PT",
+        "scaleX": 220,
+        "scaleY": 220,
+        "translateX": 90,
+        "translateY": 240,
+    },
+    "{{monthly-orders-by-user-type_chart}}": {
+        "mode": "ABSOLUTE",
+        "unit": "PT",
+        "scaleX": 185,
+        "scaleY": 185,
+        "translateX": 115,
+        "translateY": 255,
+    },
+    "{{orders-by-product-type-i-e-pay-in-3-pay_chart}}": {
+        "mode": "ABSOLUTE",
+        "unit": "PT",
+        "scaleX": 170,
+        "scaleY": 170,
+        "translateX": 120,
+        "translateY": 240,
+    },
+    "{{aov-by-product-type-i-e-pay-in-3-pay-in_chart}}": {
+        "mode": "ABSOLUTE",
+        "unit": "PT",
+        "scaleX": 150,
+        "scaleY": 150,
+        "translateX": 135,
+        "translateY": 225,
+    },
+}

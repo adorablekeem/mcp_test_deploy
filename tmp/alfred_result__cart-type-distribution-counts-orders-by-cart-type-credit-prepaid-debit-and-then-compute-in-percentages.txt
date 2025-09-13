@@ -1,0 +1,8 @@
+{
+    'structured_data': {
+        'credit': 3500,
+        'prepaid': 4350,
+        'debit': 2150
+    },
+    'paragraph': 'The distribution of orders by cart type for the merchant "1WU46Y4ZMHQ9" from January 1, 2023, to June 30, 2025, indicates that prepaid cards are the most frequently used, accounting for 43.5% of the orders. Credit cards follow with 35% of the orders, and debit cards make up the remaining 21.5%. This suggests a preference among customers to use prepaid options, potentially due to ease of use and security considerations. The data shows a steady distribution pattern in payment methods across the evaluated time frame.'
+}

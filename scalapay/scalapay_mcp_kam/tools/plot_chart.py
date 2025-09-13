@@ -1,4 +1,5 @@
 import matplotlib
+
 matplotlib.use("Agg")  # Headless backend for AWS Lambda
 
 data = {
@@ -13,8 +14,9 @@ data = {
     "Sep": {2023: 34, 2024: 31},
     "Oct": {2022: 6, 2023: 45, 2024: 25},
     "Nov": {2022: 21, 2023: 36, 2024: 36},
-    "Dec": {2022: 14, 2023: 27, 2024: 16}
+    "Dec": {2022: 14, 2023: 27, 2024: 16},
 }
+
 
 def plot_monthly_sales_chart(data: dict, output_path="/mnt/data/dynamic_chart_colored.png"):
     import matplotlib.pyplot as plt
@@ -25,8 +27,16 @@ def plot_monthly_sales_chart(data: dict, output_path="/mnt/data/dynamic_chart_co
 
     # Dynamically assign distinct colors to years using a fixed color palette
     color_palette = [
-        "#8ad3f4", "#d896f6", "#f7a463", "#f15375", "#b7b8f5", "#f6b8ea",
-        "#469acf", "#ffd700", "#b0e0e6", "#ffa07a"
+        "#8ad3f4",
+        "#d896f6",
+        "#f7a463",
+        "#f15375",
+        "#b7b8f5",
+        "#f6b8ea",
+        "#469acf",
+        "#ffd700",
+        "#b0e0e6",
+        "#ffa07a",
     ]
     colors_by_year = {year: color_palette[i % len(color_palette)] for i, year in enumerate(years)}
 
@@ -46,7 +56,7 @@ def plot_monthly_sales_chart(data: dict, output_path="/mnt/data/dynamic_chart_co
         bars = ax.bar(offsets, values, width, label=str(year), color=colors_by_year[year])
         for offset, value in zip(offsets, values):
             if value > 0:
-                ax.text(offset, value + 1, str(value), ha='center', va='bottom', fontsize=7)
+                ax.text(offset, value + 1, str(value), ha="center", va="bottom", fontsize=7)
 
     ax.set_xticks(x + width * (len(years) - 1) / 2)
     ax.set_xticklabels(months)
@@ -63,6 +73,8 @@ def plot_monthly_sales_chart(data: dict, output_path="/mnt/data/dynamic_chart_co
     height_px = int(fig_height_inch * dpi)
 
     return output_path, width_px, height_px
+
+
 """
 if __name__ == "__main__":
     # Example usage

@@ -1,0 +1,27 @@
+{
+  "execution_id": "concurrent_20250910_125010_871_chart_1",
+  "created_at": "2025-09-10T12:51:30.691042",
+  "base_folder": "plots",
+  "charts_folder": "plots/execution_concurrent_20250910_125010_871_chart_1/charts",
+  "enable_execution_folders": true,
+  "charts": [
+    {
+      "data_type": "monthly sales by product type over time",
+      "chart_path": "plots/execution_concurrent_20250910_125010_871_chart_1/charts/monthly_sales_by_product_type_over_time_1757501490_concurre.png",
+      "filename": "monthly_sales_by_product_type_over_time_1757501490_concurre.png",
+      "registered_at": "2025-09-10T12:51:30.691846",
+      "correlation_id": "concurrent_20250910_125010_871_chart_1",
+      "file_size": 167820,
+      "metadata": {
+        "data_type": "monthly sales by product type over time",
+        "correlation_id": "concurrent_20250910_125010_871_chart_1",
+        "chart_type": "unknown",
+        "generated_at": "2025-09-10 12:51:30",
+        "concurrent_generation": true
+      }
+    }
+  ],
+  "total_charts": 1,
+  "status": "active",
+  "last_updated": "2025-09-10T12:51:30.691904"
+}

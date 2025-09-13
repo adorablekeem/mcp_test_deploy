@@ -1,18 +1,22 @@
+import logging
 import os
 import time
-import logging
 
 import GoogleApiSupport.drive as Drive
 import GoogleApiSupport.slides as Slides
 import matplotlib.pyplot as plt
 import pandas as pd
-from googleapiclient.discovery import build
-from fastmcp import Context
 from dotenv import load_dotenv
+from fastmcp import Context
+from googleapiclient.discovery import build
 from langchain_openai import ChatOpenAI
 from mcp_use import MCPAgent, MCPClient
+
+# Import our simple batch operations
+from .simple_batch_operations import batch_replace_with_positioning
+
 # Set up logging
-logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(message)s')
+logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
 # Set credentials
@@ -22,8 +26,7 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./scalapay/scalapay_mcp_kam/cred
 drive_service = build("drive", "v3")
 
 
-async def create_slides(merchant_token: str, starting_date: str, end_date:str, ctx: Context | None = None) -> dict:
-
+async def create_slides(merchant_token: str, starting_date: str, end_date: str, ctx: Context | None = None) -> dict:
     logger.debug("Starting create_slides function")
     logger.debug(f"Input string: {merchant_token}")
     if ctx:
@@ -90,10 +93,9 @@ async def create_slides(merchant_token: str, starting_date: str, end_date:str, c
     try:
         output_file_id = Drive.copy_file(presentation_id, "final_presentation")
         Drive.move_file(output_file_id, folder_id)
-        Slides.batch_text_replace({"bot": merchant_token}, output_file_id)
-        logger.info(f"Slides updated and moved: {output_file_id}")
+        logger.info(f"Slides copied and moved: {output_file_id}")
         if ctx:
-            await ctx.info("📄 Template duplicated and text replaced")
+            await ctx.info("📄 Template duplicated")
     except Exception:
         logger.exception("Slides preparation failed")
         if ctx:
@@ -102,9 +104,7 @@ async def create_slides(merchant_token: str, starting_date: str, end_date:str, c
 
     try:
         upload_result = Drive.upload_file(
-            file_name="monthly_sales_profit_chart.png",
-            parent_folder_id=[folder_id],
-            local_file_path=chart_path
+            file_name="monthly_sales_profit_chart.png", parent_folder_id=[folder_id], local_file_path=chart_path
         )
         chart_file_id = upload_result.get("file_id")
         logger.info(f"Chart uploaded: {chart_file_id}")
@@ -120,17 +120,47 @@ async def create_slides(merchant_token: str, starting_date: str, end_date:str, c
 
     direct_url = f"https://drive.google.com/uc?export=view&id={chart_file_id}"
 
+    # Use simple batch operations with original translateX/translateY positioning
     image_success = False
     try:
-        Slides.batch_replace_shape_with_image({"image1": direct_url, "image2": direct_url}, output_file_id)
-        logger.info("Image inserted")
+        # Text and image replacements with positioning (original pattern)
+        text_mapping = {"bot": merchant_token}
+        image_mapping = {"image1": direct_url, "image2": direct_url}
+        
+        # Original positioning logic - simple translateX/translateY in points
+        positioning = {
+            "image1": {
+                "translateX": 130,  # X position in points
+                "translateY": 250,  # Y position in points
+                "scaleX": 1.0,
+                "scaleY": 1.0,
+                "unit": "PT"
+            },
+            "image2": {
+                "translateX": 400,  # Second image to the right
+                "translateY": 250,  # Same Y position
+                "scaleX": 1.0,
+                "scaleY": 1.0, 
+                "unit": "PT"
+            }
+        }
+        
+        await batch_replace_with_positioning(
+            text_mapping=text_mapping,
+            image_mapping=image_mapping,
+            presentation_id=output_file_id,
+            transform_configs=positioning,
+            ctx=ctx
+        )
+        
+        logger.info("Text and images inserted with positioning")
         if ctx:
-            await ctx.info("🖼️ Chart inserted into slides")
+            await ctx.info("🖼️ Charts inserted with original positioning logic")
         image_success = True
     except Exception:
-        logger.exception("Image insertion failed")
+        logger.exception("Batch replacement failed")
         if ctx:
-            await ctx.warning("⚠️ Image insertion failed")
+            await ctx.warning("⚠️ Batch replacement failed")
 
     pdf_path = None
     try:

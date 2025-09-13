@@ -1,0 +1,8 @@
+{
+    'structured_data': {
+        'Scalapay Network': 120,
+        'Returning': 200,
+        'New': 180
+    },
+    'paragraph': 'Based on the data from 2023-01-01 to 2025-06-30, the merchant "1WU46Y4ZMHQ9" shows that the majority of orders were placed by Returning users, followed by New users, and Scalapay Network users. This indicates a strong return customer base, which is essential for sustained business growth. The New customer group is also notable, indicating successful marketing and customer acquisition strategies. Scalapay Network users represent the smallest group, suggesting an area for potential growth through strategic partnerships and promotions.'
+}

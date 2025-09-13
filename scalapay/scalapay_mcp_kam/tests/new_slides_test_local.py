@@ -1,32 +1,35 @@
-from dataclasses import dataclass
-import os
-import logging
 import asyncio
+import json
+import logging
+import os
+import re
+from dataclasses import dataclass
+from typing import Any, Dict, List
+
 import GoogleApiSupport.drive as Drive
 import GoogleApiSupport.slides as Slides
 import pandas as pd
-from googleapiclient.discovery import build
-from fastmcp import Context
 from dotenv import load_dotenv
+from fastmcp import Context
+from googleapiclient.discovery import build
 from langchain_openai import ChatOpenAI
 from mcp_use import MCPAgent, MCPClient
+from scalapay.scalapay_mcp_kam.prompts.charts_prompt import MONTHLY_SALES_PROMPT as MONTHLY_SALES_CHART_PROMPT
 from scalapay.scalapay_mcp_kam.tools.plot_chart import plot_monthly_sales_chart
-from prompts.charts_prompt import MONTHLY_SALES_CHART_PROMPT
-import json
-import re
-from typing import Dict, Any, List
 
 # Set up logging
-logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(message)s')
+logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
 # Set credentials
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./scalapay/scalapay_mcp_kam/credentials.json"
 drive_service = build("drive", "v3")
 
+
 @dataclass
 class SlidesContent:
     structured_data: dict = None
+
 
 @dataclass
 class JudgeDecision:
@@ -34,6 +37,7 @@ class JudgeDecision:
     confidence_score: float  # 0-1
     feedback: str
     suggestions: List[str]
+
 
 @dataclass
 class ReActIteration:
@@ -53,9 +57,16 @@ class ReActSlidesGenerator:
         self.reasoning_llm = ChatOpenAI(model="gpt-4o", temperature=0.7)
         self.iterations: List[ReActIteration] = []
 
-    async def judge_content(self, content: SlidesContent, alfred_result: str,
-                          merchant_token: str, starting_date: str, end_date: str,
-                          iteration: int, previous_feedback: str = "") -> JudgeDecision:
+    async def judge_content(
+        self,
+        content: SlidesContent,
+        alfred_result: str,
+        merchant_token: str,
+        starting_date: str,
+        end_date: str,
+        iteration: int,
+        previous_feedback: str = "",
+    ) -> JudgeDecision:
         """LLM-as-a-judge to evaluate only structured data quality"""
         judge_llm = self.judge_llm.with_structured_output(JudgeDecision)
 
@@ -76,13 +87,17 @@ class ReActSlidesGenerator:
         """
 
         try:
-            decision = await judge_llm.ainvoke([
-                {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
-                {"role": "user", "content": JUDGE_EVALUATION_PROMPT}
-            ])
-            logger.info(f"Judge Decision - Iteration {iteration}: "
-                        f"Acceptable: {decision.is_acceptable}, "
-                        f"Confidence: {decision.confidence_score:.2f}")
+            decision = await judge_llm.ainvoke(
+                [
+                    {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
+                    {"role": "user", "content": JUDGE_EVALUATION_PROMPT},
+                ]
+            )
+            logger.info(
+                f"Judge Decision - Iteration {iteration}: "
+                f"Acceptable: {decision.is_acceptable}, "
+                f"Confidence: {decision.confidence_score:.2f}"
+            )
             return decision
         except Exception as e:
             logger.error(f"Judge evaluation failed: {e}")
@@ -90,11 +105,10 @@ class ReActSlidesGenerator:
                 is_acceptable=False,
                 confidence_score=0.0,
                 feedback=f"Judge evaluation failed: {str(e)}",
-                suggestions=["Retry with original approach"]
+                suggestions=["Retry with original approach"],
             )
 
-    async def execute_mcp_query(self, query: str, merchant_token: str,
-                                client: MCPClient, agent: MCPAgent) -> str:
+    async def execute_mcp_query(self, query: str, merchant_token: str, client: MCPClient, agent: MCPAgent) -> str:
         """Execute MCP query and return result"""
         try:
             result = await agent.run(query.format(merchant_token=merchant_token), max_steps=30)
@@ -115,8 +129,9 @@ class ReActSlidesGenerator:
             ```"""
 
 
-async def create_slides_with_react(merchant_token: str, starting_date: str, end_date: str,
-                                   ctx: Context | None = None) -> dict:
+async def create_slides_with_react(
+    merchant_token: str, starting_date: str, end_date: str, ctx: Context | None = None
+) -> dict:
     """Enhanced create_slides with ReAct flow (only charts/structured data)"""
 
     if ctx:
@@ -136,14 +151,12 @@ async def create_slides_with_react(merchant_token: str, starting_date: str, end_
     current_query = original_query
 
     for iteration in range(1, react_generator.max_iterations + 1):
-        alfred_result = await react_generator.execute_mcp_query(
-            current_query, merchant_token, client, agent
-        )
+        alfred_result = await react_generator.execute_mcp_query(current_query, merchant_token, client, agent)
 
         # Parse structured data directly from Alfred result
         structured_data = {}
         try:
-            json_match = re.search(r'```json\s*(\{.*?\})\s*```', alfred_result, re.DOTALL)
+            json_match = re.search(r"```json\s*(\{.*?\})\s*```", alfred_result, re.DOTALL)
             if json_match:
                 raw_data_str = json_match.group(1).replace("'", '"')
                 structured_data = {"months": json.loads(raw_data_str)}
@@ -158,8 +171,7 @@ async def create_slides_with_react(merchant_token: str, starting_date: str, end_
             previous_feedback = react_generator.iterations[-1].judge_decision.feedback
 
         judge_decision = await react_generator.judge_content(
-            slides_content, alfred_result, merchant_token,
-            starting_date, end_date, iteration, previous_feedback
+            slides_content, alfred_result, merchant_token, starting_date, end_date, iteration, previous_feedback
         )
 
         react_iteration = ReActIteration(
@@ -168,37 +180,44 @@ async def create_slides_with_react(merchant_token: str, starting_date: str, end_
             action=current_query,
             observation=alfred_result,
             result=slides_content,
-            judge_decision=judge_decision
+            judge_decision=judge_decision,
         )
         react_generator.iterations.append(react_iteration)
 
         if judge_decision.is_acceptable and judge_decision.confidence_score >= react_generator.confidence_threshold:
-            return await finalize_slides(slides_content, alfred_result,
-                                         merchant_token, starting_date, end_date,
-                                         iteration, ctx)
+            return await finalize_slides(
+                slides_content, alfred_result, merchant_token, starting_date, end_date, iteration, ctx
+            )
 
     # fallback → best attempt
-    best_iteration = max(react_generator.iterations,
-                         key=lambda x: x.judge_decision.confidence_score)
-    return await finalize_slides(best_iteration.result, best_iteration.observation,
-                                 merchant_token, starting_date, end_date,
-                                 best_iteration.iteration, ctx)
+    best_iteration = max(react_generator.iterations, key=lambda x: x.judge_decision.confidence_score)
+    return await finalize_slides(
+        best_iteration.result,
+        best_iteration.observation,
+        merchant_token,
+        starting_date,
+        end_date,
+        best_iteration.iteration,
+        ctx,
+    )
 
 
-async def finalize_slides(slides_content: SlidesContent, alfred_result: str,
-                          merchant_token: str, starting_date: str, end_date: str,
-                          iteration: int, ctx: Context | None = None) -> dict:
-
+async def finalize_slides(
+    slides_content: SlidesContent,
+    alfred_result: str,
+    merchant_token: str,
+    starting_date: str,
+    end_date: str,
+    iteration: int,
+    ctx: Context | None = None,
+) -> dict:
     raw_data = slides_content.structured_data.get("months", {})
     normalized_data = {
-        month: {int(year): val for year, val in yearly_data.items()}
-        for month, yearly_data in raw_data.items()
+        month: {int(year): val for year, val in yearly_data.items()} for month, yearly_data in raw_data.items()
     }
 
     chart_path = f"/tmp/monthly_sales_profit_chart_iteration_{iteration}.png"
-    chart_path, width_px, height_px = plot_monthly_sales_chart(
-        normalized_data, output_path=chart_path
-    )
+    chart_path, width_px, height_px = plot_monthly_sales_chart(normalized_data, output_path=chart_path)
 
     # Google Slides integration (no text replace anymore)
     presentation_id = "1hDkICKx4D3jHdxky_3_1iJcPFVQFxTkvlH7mVSFCx_o"
@@ -209,16 +228,13 @@ async def finalize_slides(slides_content: SlidesContent, alfred_result: str,
     upload_result = Drive.upload_file(
         file_name=f"monthly_sales_profit_chart_iter_{iteration}.png",
         parent_folder_id=[folder_id],
-        local_file_path=chart_path
+        local_file_path=chart_path,
     )
     chart_file_id = upload_result.get("file_id")
     if chart_file_id:
         direct_url = f"https://drive.google.com/uc?export=view&id={chart_file_id}"
         Slides.batch_replace_shape_with_image(
-            {"monthly_sales_chart": direct_url},
-            output_file_id,
-            position=(144, 108),
-            size=(400, 300)
+            {"monthly_sales_chart": direct_url}, output_file_id, position=(144, 108), size=(400, 300)
         )
 
     return {
@@ -226,11 +242,10 @@ async def finalize_slides(slides_content: SlidesContent, alfred_result: str,
         "chart_file_id": chart_file_id,
         "presentation_id": output_file_id,
         "iteration_used": iteration,
-        "react_summary": f"Completed in {iteration} iterations with LLM judge validation (charts only)"
+        "react_summary": f"Completed in {iteration} iterations with LLM judge validation (charts only)",
     }
 
 
 # Entry
-async def create_slides(merchant_token: str, starting_date: str, end_date: str,
-                       ctx: Context | None = None) -> dict:
+async def create_slides(merchant_token: str, starting_date: str, end_date: str, ctx: Context | None = None) -> dict:
     return await create_slides_with_react(merchant_token, starting_date, end_date, ctx)

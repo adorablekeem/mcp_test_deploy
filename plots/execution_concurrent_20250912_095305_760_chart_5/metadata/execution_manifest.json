@@ -1,0 +1,27 @@
+{
+  "execution_id": "concurrent_20250912_095305_760_chart_5",
+  "created_at": "2025-09-12T09:54:22.132273",
+  "base_folder": "plots",
+  "charts_folder": "plots/execution_concurrent_20250912_095305_760_chart_5/charts",
+  "enable_execution_folders": true,
+  "charts": [
+    {
+      "data_type": "orders by product type (i.e. pay in 3, pay in 4)",
+      "chart_path": "plots/execution_concurrent_20250912_095305_760_chart_5/charts/orders_by_product_type_ie_pay_in_3_pay_in_4_1757663662_concurre.png",
+      "filename": "orders_by_product_type_ie_pay_in_3_pay_in_4_1757663662_concurre.png",
+      "registered_at": "2025-09-12T09:54:22.132694",
+      "correlation_id": "concurrent_20250912_095305_760_chart_5",
+      "file_size": 87552,
+      "metadata": {
+        "data_type": "orders by product type (i.e. pay in 3, pay in 4)",
+        "correlation_id": "concurrent_20250912_095305_760_chart_5",
+        "chart_type": "unknown",
+        "generated_at": "2025-09-12 09:54:22",
+        "concurrent_generation": true
+      }
+    }
+  ],
+  "total_charts": 1,
+  "status": "active",
+  "last_updated": "2025-09-12T09:54:22.132737"
+}

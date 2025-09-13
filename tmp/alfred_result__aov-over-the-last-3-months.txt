@@ -1,0 +1,8 @@
+{
+    'structured_data': {
+        '2025-04': {'average_order_value': null},
+        '2025-05': {'average_order_value': null},
+        '2025-06': {'average_order_value': null}
+    },
+    'paragraph': 'The Average Order Value (AOV) for the merchant 1WU46Y4ZMHQ9 shows no recorded transactions over the past three months of April to June 2025. This may indicate a seasonal slowdown, operational challenges, or other factors affecting the number of placed orders during this period. More detailed investigation into the merchant\'s activities during these months may be required to understand the underlying causes fully.'
+}

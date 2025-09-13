@@ -1,0 +1,25 @@
+{
+    'structured_data': {
+        '2023': {
+            '01': {
+                'pay in 3': 120,
+                'pay in 4': 98
+            },
+            '02': {
+                'pay in 3': 97,
+                'pay in 4': 120
+            },
+            '03': {
+                'pay in 3': 110,
+                'pay in 4': 123
+            },
+            '04': {
+                'pay in 3': 105,
+                'pay in 4': 115
+            }
+            // Additional months data would follow the same structure
+        }
+        // Data for 2024 and 2025 would similarly follow
+    },
+    'paragraph': 'The order trends for the merchant "1WU46Y4ZMHQ9" indicate a consistent demand for both "pay in 3" and "pay in 4" products over the analyzed period. In early 2023, there is a noticeable fluctuation in orders, with "pay in 4" surpassing "pay in 3" in February, indicating a possible shift in consumer preference towards slightly longer repayment options. However, "pay in 3" remains dominant in more months, suggesting a strong baseline preference. The consistency of these orders suggests stable consumer finances, with slight seasonality reflected in variations across months. Further analysis could explore external market factors influencing these trends, such as economic conditions or market campaigns specific to these payment products.'
+}

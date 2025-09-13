@@ -1,0 +1,27 @@
+{
+  "execution_id": "concurrent_20250910_145834_749_chart_6",
+  "created_at": "2025-09-10T14:59:29.537884",
+  "base_folder": "plots",
+  "charts_folder": "plots/execution_concurrent_20250910_145834_749_chart_6/charts",
+  "enable_execution_folders": true,
+  "charts": [
+    {
+      "data_type": "AOV by product type (i.e. pay in 3, pay in 4)",
+      "chart_path": "plots/execution_concurrent_20250910_145834_749_chart_6/charts/AOV_by_product_type_ie_pay_in_3_pay_in_4_1757509169_concurre.png",
+      "filename": "AOV_by_product_type_ie_pay_in_3_pay_in_4_1757509169_concurre.png",
+      "registered_at": "2025-09-10T14:59:29.538512",
+      "correlation_id": "concurrent_20250910_145834_749_chart_6",
+      "file_size": 98681,
+      "metadata": {
+        "data_type": "AOV by product type (i.e. pay in 3, pay in 4)",
+        "correlation_id": "concurrent_20250910_145834_749_chart_6",
+        "chart_type": "unknown",
+        "generated_at": "2025-09-10 14:59:29",
+        "concurrent_generation": true
+      }
+    }
+  ],
+  "total_charts": 1,
+  "status": "active",
+  "last_updated": "2025-09-10T14:59:29.538592"
+}

@@ -1,4 +1,5 @@
 import os
+
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
@@ -6,35 +7,34 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize the client
-client = Anthropic(
-    api_key=os.getenv("ANTHROPIC_API_KEY")
-)
+client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
 
 def generate_chart_with_claude(data_description, color_palette=None, return_image=True):
     """
     Generate a chart using Claude's code execution based on natural language description
-    
+
     Args:
         data_description: Natural language description of the data and chart requirements
         color_palette: Optional list of hex colors to use for the chart
         return_image: If True, return the image data directly
     """
-    
+
     # Default color palette if none provided
     if color_palette is None:
         color_palette = [
-            "#87CEEB", 
-            "#DA70D6", 
-            "#FFA500", 
-            "#FF1493", 
-            "#9370DB", 
-            "#FFA07A", 
-            "#FFB6C1", 
-            "#FF69B4", 
-            "#98FB98", 
-            "#DDA0DD" 
+            "#87CEEB",
+            "#DA70D6",
+            "#FFA500",
+            "#FF1493",
+            "#9370DB",
+            "#FFA07A",
+            "#FFB6C1",
+            "#FF69B4",
+            "#98FB98",
+            "#DDA0DD",
         ]
-    
+
     # Create the prompt for Claude - with image return mechanism
     if return_image:
         prompt = f"""
@@ -88,63 +88,66 @@ def generate_chart_with_claude(data_description, color_palette=None, return_imag
         - Use tight_layout() for optimal spacing
         - Print the file size after saving
         """
-    
+
     # Execute the request
     response = client.beta.messages.create(
-        model="claude-opus-4-1-20250805",  
+        model="claude-opus-4-1-20250805",
         betas=["code-execution-2025-05-22"],
         max_tokens=4096,
-        messages=[{
-            "role": "user",
-            "content": prompt
-        }],
-        tools=[{
-            "type": "code_execution_20250522",
-            "name": "code_execution"
-        }]
+        messages=[{"role": "user", "content": prompt}],
+        tools=[{"type": "code_execution_20250522", "name": "code_execution"}],
     )
-    
+
     return response
+
 
 def download_generated_files(response):
     """
     Download any files generated during code execution
     """
     downloaded_files = []
-    
+
     for item in response.content:
-        if hasattr(item, 'type') and item.type == 'code_execution_tool_result':
+        if hasattr(item, "type") and item.type == "code_execution_tool_result":
             # Print execution output
-            if hasattr(item.content, 'stdout') and item.content.stdout:
+            if hasattr(item.content, "stdout") and item.content.stdout:
                 print("Execution output:")
                 print(item.content.stdout)
-            
+
             # Check for generated files
-            if hasattr(item.content, 'content'):
+            if hasattr(item.content, "content"):
                 for file_info in item.content.content:
-                    if 'file_id' in file_info:
+                    if "file_id" in file_info:
                         try:
-                            file_metadata = client.beta.files.retrieve_metadata(file_info['file_id'])
-                            file_content = client.beta.files.download(file_info['file_id'])
-                            
+                            file_metadata = client.beta.files.retrieve_metadata(file_info["file_id"])
+                            file_content = client.beta.files.download(file_info["file_id"])
+
                             local_filename = file_metadata.filename or "chart.png"
                             file_content.write_to_file(local_filename)
                             downloaded_files.append(local_filename)
                             print(f"✓ Chart downloaded: {local_filename}")
                         except Exception as e:
                             print(f"Error downloading file: {e}")
-    
+
     return downloaded_files
+
 
 # Example usage
 if __name__ == "__main__":
-    
     # Define your custom color palette
     my_colors = [
-        "#8ad3f4", "#d896f6", "#f7a463", "#f15375", "#b7b8f5", 
-        "#f6b8ea", "#469acf", "#ffd700", "#b0e0e6", "#ffa07a"
+        "#8ad3f4",
+        "#d896f6",
+        "#f7a463",
+        "#f15375",
+        "#b7b8f5",
+        "#f6b8ea",
+        "#469acf",
+        "#ffd700",
+        "#b0e0e6",
+        "#ffa07a",
     ]
-    
+
     # Example 1: Monthly sales data
     sales_description = """
     Create a grouped bar chart showing monthly sales data:
@@ -159,13 +162,13 @@ if __name__ == "__main__":
     Add value labels on top of each bar.
     Title: "Monthly Sales Comparison 2023-2025"
     """
-    
+
     print("Generating sales chart...")
     response = generate_chart_with_claude(sales_description, my_colors)
     files = download_generated_files(response)
-    
+
     print("-" * 50)
-    
+
     # Example 2: Different type of chart with same color palette
     revenue_description = """
     Create a line chart showing quarterly revenue trends:
@@ -176,31 +179,33 @@ if __name__ == "__main__":
     Title: "Quarterly Revenue Growth"
     Y-axis should show values in millions with $ prefix.
     """
-    
+
     print("\nGenerating revenue chart...")
     response2 = generate_chart_with_claude(revenue_description, my_colors)
     files2 = download_generated_files(response2)
-    
+
     print("\nAll charts generated successfully!")
     print(f"Files created: {files + files2}")
+
 
 # Alternative: Simple one-liner function for quick charts
 def quick_chart(description, colors=None):
     """
     Quick function to generate a chart with minimal code
-    
+
     Example:
         quick_chart("Bar chart of product sales: A=100, B=150, C=200")
     """
     response = generate_chart_with_claude(description, colors)
     return download_generated_files(response)
 
+
 # Simpler approach: Just ask Claude to create the chart without file handling
 def create_chart_simple(data_description, save_locally=True):
     """
     Simpler approach - just ask Claude to create and show the chart
     """
-    
+
     prompt = f"""
     Create a matplotlib chart based on this description: {data_description}
     
@@ -208,18 +213,14 @@ def create_chart_simple(data_description, save_locally=True):
     Save the final chart to 'chart.png' in the current directory if possible.
     Show me the chart data and confirm it was created.
     """
-    
+
     response = client.messages.create(
-        model="claude-opus-4-1-20250805",
-        max_tokens=4096,
-        messages=[{
-            "role": "user",
-            "content": prompt
-        }]
+        model="claude-opus-4-1-20250805", max_tokens=4096, messages=[{"role": "user", "content": prompt}]
     )
-    
+
     print(response.content[0].text)
     return response
+
 
 # Most direct approach: Use matplotlib locally with Claude generating the code
 def generate_chart_code_only(data_description, color_palette=None):
@@ -228,10 +229,18 @@ def generate_chart_code_only(data_description, color_palette=None):
     """
     if color_palette is None:
         color_palette = [
-            "#8ad3f4", "#d896f6", "#f7a463", "#f15375", "#b7b8f5", 
-            "#f6b8ea", "#469acf", "#ffd700", "#b0e0e6", "#ffa07a"
+            "#8ad3f4",
+            "#d896f6",
+            "#f7a463",
+            "#f15375",
+            "#b7b8f5",
+            "#f6b8ea",
+            "#469acf",
+            "#ffd700",
+            "#b0e0e6",
+            "#ffa07a",
         ]
-    
+
     prompt = f"""
     Generate Python matplotlib code to create this chart: {data_description}
     
@@ -244,19 +253,14 @@ def generate_chart_code_only(data_description, color_palette=None):
     - Save to 'generated_chart.png'
     - The code should be ready to run as-is
     """
-    
+
     response = client.messages.create(
-        model="claude-opus-4-1-20250805",
-        max_tokens=4096,
-        messages=[{
-            "role": "user",
-            "content": prompt
-        }]
+        model="claude-opus-4-1-20250805", max_tokens=4096, messages=[{"role": "user", "content": prompt}]
     )
-    
+
     # Extract the code from the response
     code_text = response.content[0].text
-    
+
     # Find code block if it exists
     if "```python" in code_text:
         start = code_text.index("```python") + 9
@@ -264,19 +268,19 @@ def generate_chart_code_only(data_description, color_palette=None):
         code = code_text[start:end].strip()
     else:
         code = code_text.strip()
-    
+
     # Save the code
-    with open('generated_chart_code.py', 'w') as f:
+    with open("generated_chart_code.py", "w") as f:
         f.write(code)
-    
+
     print("Chart code saved to 'generated_chart_code.py'")
     print("Running the code locally...")
-    
+
     # Execute the code locally
     try:
         exec(code)
         print("✓ Chart generated successfully as 'generated_chart.png'")
-        return 'generated_chart.png'
+        return "generated_chart.png"
     except Exception as e:
         print(f"Error running code: {e}")
         print("You can manually run 'generated_chart_code.py' to create the chart")

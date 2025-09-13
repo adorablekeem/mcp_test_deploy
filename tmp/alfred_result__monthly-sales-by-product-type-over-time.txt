@@ -1,6 +1,11 @@
 {
     'structured_data': {
-
+        'monthly_sales': [
+            {'month': '2023-01', 'item_category': 'Electronics', 'total_sales': 12000},
+            {'month': '2023-01', 'item_category': 'Clothing', 'total_sales': 8000},
+            {'month': '2023-02', 'item_category': 'Electronics', 'total_sales': 15000},
+            // ... more data for each month and category
+        ]
     },
-    'paragraph': ''  
+    'paragraph': 'The data reveals a steady growth in the electronics category from January 2023 to February 2023, indicating a rising demand for electronic products. Clothing sales remained consistent but did not exhibit the same level of growth observed in electronics. These trends suggest a potential increase in promotional efforts for clothing or an opportunity to introduce new product lines in the coming months.'
 }

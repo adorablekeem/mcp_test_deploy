@@ -1,11 +1,12 @@
 import ast
+import json
 import logging
 import re
-import json
 
 # Set up logging
-logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(message)s')
+logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
+
 
 def _slice_outmost_braces(s: str) -> str:
     """Return the substring spanning the first complete {...} block."""
@@ -20,7 +21,7 @@ def _slice_outmost_braces(s: str) -> str:
         elif c == "}":
             depth -= 1
             if depth == 0:
-                return s[start:i+1]
+                return s[start : i + 1]
     # If we never closed, return original (will fail later and log)
     return s
 
@@ -33,6 +34,7 @@ def _safe_to_float(val) -> float | None:
         return float(str(val).strip())
     except Exception:
         return None
+
 
 def _normalize_months_map(months_map: dict) -> dict[str, dict[int, float]]:
     """
@@ -66,6 +68,7 @@ def _normalize_months_map(months_map: dict) -> dict[str, dict[int, float]]:
             normalized[month] = clean_yearly
 
     return normalized
+
 
 def _extract_months_map(alfred_text) -> dict:
     """

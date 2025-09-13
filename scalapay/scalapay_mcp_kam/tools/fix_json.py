@@ -1,6 +1,7 @@
-
+import json
+import pathlib
+import sys
 from ast import literal_eval
-import json, sys, pathlib
 
 src = pathlib.Path("/Users/keem.adorable@scalapay.com/scalapay/scalapay_mcp_kam/scalapay/scalapay_mcp_kam/results.json")
 dst = src.with_suffix(".json.fixed")

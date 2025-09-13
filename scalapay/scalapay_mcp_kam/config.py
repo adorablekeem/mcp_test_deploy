@@ -5,12 +5,13 @@ Includes feature flags and environment-based configuration.
 
 import os
 from dataclasses import dataclass
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 @dataclass
 class EnhancedParagraphConfig:
     """Configuration for LLM-processed paragraph feature."""
+
     enabled: bool = False
     llm_model: str = "gpt-4o"
     max_slide_paragraph_words: int = 80
@@ -22,7 +23,7 @@ class EnhancedParagraphConfig:
 
 class Config:
     """Main configuration class for the application."""
-    
+
     def __init__(self):
         self.enhanced_paragraph_processing = EnhancedParagraphConfig(
             enabled=os.getenv("ENABLE_LLM_PARAGRAPHS", "false").lower() == "true",
@@ -31,15 +32,17 @@ class Config:
             enable_speaker_notes=os.getenv("ENABLE_SPEAKER_NOTES", "true").lower() == "true",
             fallback_on_error=os.getenv("FALLBACK_ON_LLM_ERROR", "true").lower() == "true",
             parallel_processing=os.getenv("PARALLEL_LLM_PROCESSING", "true").lower() == "true",
-            max_processing_time_seconds=int(os.getenv("MAX_LLM_PROCESSING_TIME", "30"))
+            max_processing_time_seconds=int(os.getenv("MAX_LLM_PROCESSING_TIME", "30")),
         )
-        
+
         # General application settings
         self.debug_mode = os.getenv("DEBUG_MODE", "false").lower() == "true"
-        self.google_credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "./scalapay/scalapay_mcp_kam/credentials.json")
+        self.google_credentials_path = os.getenv(
+            "GOOGLE_APPLICATION_CREDENTIALS", "./scalapay/scalapay_mcp_kam/credentials.json"
+        )
         self.default_template_id = "1hDkICKx4D3jHdxky_3_1iJcPFVQFxTkvlH7mVSFCx_o"
         self.default_folder_id = "1x03ugPUeGSsLYY2kH-FsNC9_f_M6iLGL"
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary for logging/debugging."""
         return {

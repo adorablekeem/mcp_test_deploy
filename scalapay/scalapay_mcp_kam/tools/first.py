@@ -1,13 +1,12 @@
-from googleapiclient.discovery import Resource
-from typing import Any, Dict, Optional
-from error_handler import handle_google_api_error  # You should implement this
-from schemas import BatchUpdatePresentationArgs  # You should define this schema
 import json
+from typing import Any, Dict, Optional
 
-def batch_update_presentation_tool(
-    slides: Resource,
-    args: BatchUpdatePresentationArgs
-) -> Dict[str, Any]:
+from error_handler import handle_google_api_error  # You should implement this
+from googleapiclient.discovery import Resource
+from schemas import BatchUpdatePresentationArgs  # You should define this schema
+
+
+def batch_update_presentation_tool(slides: Resource, args: BatchUpdatePresentationArgs) -> Dict[str, Any]:
     """
     Applies a batch of updates to a Google Slides presentation.
 
@@ -22,17 +21,19 @@ def batch_update_presentation_tool(
         McpError: if the Google API call fails.
     """
     try:
-        response = slides.presentations().batchUpdate(
-            presentationId=args.presentation_id,
-            body={
-                "requests": args.requests,
-                "writeControl": getattr(args, "write_control", None),
-            }
-        ).execute()
+        response = (
+            slides.presentations()
+            .batchUpdate(
+                presentationId=args.presentation_id,
+                body={
+                    "requests": args.requests,
+                    "writeControl": getattr(args, "write_control", None),
+                },
+            )
+            .execute()
+        )
 
-        return {
-            "content": [{"type": "text", "text": json.dumps(response, indent=2)}]
-        }
+        return {"content": [{"type": "text", "text": json.dumps(response, indent=2)}]}
 
     except Exception as error:
         raise handle_google_api_error(error, "batch_update_presentation")
