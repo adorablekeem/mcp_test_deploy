@@ -21,9 +21,7 @@ mcp = FastMCP(
     instructions="""
         This server allows to create slides about merchants given the merchant token and the period.
         Call create_slides_wrapper() to generate the slides, considering that the tool will take a dataframe from another mcp server (alfred). Call this tool only when you have the merchant token and the period given by the user. don't make them up.
-               
     """,
-    stateless_http=True,
 )
 config = RunnableConfig()
 
@@ -39,6 +37,10 @@ async def health_check(request: Request):
             "services": {"slides_creation": "available", "pdf_reading": "available", "google_drive": "available"},
         }
     )
+
+@mcp.custom_route("/", methods=["GET", "POST"])
+async def root_ok(_: Request):
+    return JSONResponse({"status": "ok"})
 
 
 @dataclass
@@ -328,7 +330,7 @@ def provide_recent_document(path: str):
 if __name__ == "__main__":
     logger.info("🚀 Starting MCP server")
     try:
-        mcp.run(transport="streamable-http", host="0.0.0.0", port=8005)
+        mcp.run(transport="streamable-http", host="0.0.0.0", port=8005, stateless_http=True)
     except Exception:
         logger.exception("❌ MCP crashed")
         sys.exit(1)
